@@ -381,19 +381,37 @@ function handleFiles(files) {
   var processed = 0;
   for (var i = 0; i < toProcess; i++) {
     (function(file) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var dataUrl = e.target.result;
-        var b64 = dataUrl.split(',')[1];
-        var mime = file.type || 'image/jpeg';
+      resizeImage(file, 1200, 0.8, function(b64, mime) {
         images.push(b64);
         imageTypes.push(mime);
         processed++;
         if (processed === toProcess) renderPreviews();
-      };
-      reader.readAsDataURL(file);
+      });
     })(files[i]);
   }
+}
+
+function resizeImage(file, maxDim, quality, cb) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', quality);
+      var b64 = dataUrl.split(',')[1];
+      cb(b64, 'image/jpeg');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 /* ── CAMERA ── */
@@ -425,11 +443,15 @@ function shootPhoto() {
   var vid = document.getElementById('cam-feed');
   var canvas = document.getElementById('cam-canvas');
   if (!vid || !canvas) return;
-  canvas.width = vid.videoWidth;
-  canvas.height = vid.videoHeight;
+  var w = vid.videoWidth, h = vid.videoHeight, maxDim = 1200;
+  if (w > maxDim || h > maxDim) {
+    if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+    else { w = Math.round(w * maxDim / h); h = maxDim; }
+  }
+  canvas.width = w; canvas.height = h;
   var ctx = canvas.getContext('2d');
-  ctx.drawImage(vid, 0, 0);
-  var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  ctx.drawImage(vid, 0, 0, w, h);
+  var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
   var b64 = dataUrl.split(',')[1];
   images.push(b64);
   imageTypes.push('image/jpeg');
