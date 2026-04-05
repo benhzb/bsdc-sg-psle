@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-WOLF · MKG-007 · Coin Vault Heist</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c08;--bg2:#0d1009;--bg3:#131609;
+  --panel:#111408;--panel2:#161909;
+  --accent:#7cb518;--accent2:#9cd62a;--accent-l:rgba(124,181,24,.13);
+  --red:#e74c3c;--red-l:rgba(231,76,60,.13);
+  --amber:#f39c12;--amber-l:rgba(243,156,18,.13);
+  --blue:#3498db;--blue-l:rgba(52,152,219,.13);
+  --purple:#8b5cf6;--purple-l:rgba(139,92,246,.13);
+  --teal:#14b8a6;--teal-l:rgba(20,184,166,.13);
+  --text:#c8d4a0;--text2:#7a8a5a;--text3:#3a4a2a;
+  --border:rgba(124,181,24,.14);--border2:rgba(124,181,24,.28);
+}
+html,body{min-height:100vh;background:#050705;display:flex;justify-content:center;align-items:flex-start;padding:16px}
+#app{width:100%;max-width:820px;font-family:'Barlow Condensed',sans-serif;background:var(--bg);border-radius:4px;overflow:hidden;color:var(--text);border:1px solid var(--border);position:relative}
+#app::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(124,181,24,.018) 2px,rgba(124,181,24,.018) 4px);pointer-events:none;z-index:100}
+.corner{position:absolute;width:16px;height:16px;border-color:var(--accent);border-style:solid;opacity:.5;z-index:5;pointer-events:none}
+.corner.tl{top:4px;left:4px;border-width:2px 0 0 2px}
+.corner.tr{top:4px;right:4px;border-width:2px 2px 0 0}
+.corner.bl{bottom:4px;left:4px;border-width:0 0 2px 2px}
+.corner.br{bottom:4px;right:4px;border-width:0 2px 2px 0}
+
+/* ── GLOBAL HEADER ── */
+.g-hdr{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.g-logo{font-family:'Barlow Condensed';font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:3px;flex-shrink:0}
+.g-logo em{font-style:normal;color:var(--accent)}
+.g-sep{width:1px;height:14px;background:var(--border2);flex-shrink:0}
+.g-title{font-size:.88rem;font-weight:700;color:#fff;letter-spacing:.5px;flex:1}
+.g-phase-strip{display:flex;gap:6px;align-items:center}
+.gph{display:flex;align-items:center;gap:4px;font-size:.58rem;font-weight:700;font-family:'Share Tech Mono';letter-spacing:.5px;color:var(--text3);padding:3px 8px;border:1px solid var(--border);transition:all .3s}
+.gph.done{color:var(--accent);border-color:rgba(124,181,24,.3);background:var(--accent-l)}
+.gph.active{color:#fff;border-color:var(--accent);background:rgba(124,181,24,.08)}
+.gph-num{width:14px;height:14px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.5rem;flex-shrink:0}
+.gph.done .gph-num{background:var(--accent);color:#000;border-color:var(--accent)}
+.gph.active .gph-num{background:rgba(124,181,24,.2)}
+.g-hud{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.hud-pill{display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:0;border:1px solid var(--border2);background:var(--bg3);font-family:'Share Tech Mono';font-size:.74rem;font-weight:800}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:blink .7s infinite ease-in-out;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* ── SCREENS ── */
+.screen{display:none;position:relative}
+.screen.active{display:block}
+
+/* ══════════════════════════
+   SCREEN 0 — PARENT SETUP
+══════════════════════════ */
+#s0{padding:18px}
+.parent-banner{display:flex;align-items:center;gap:10px;background:var(--purple-l);border:1px solid rgba(139,92,246,.3);padding:9px 16px;margin-bottom:16px;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
+.pb-tag{font-size:.6rem;font-weight:700;letter-spacing:2px;color:var(--purple);font-family:'Share Tech Mono';text-transform:uppercase}
+.pb-txt{font-size:.72rem;color:var(--text2);flex:1}
+.level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.lc{background:var(--panel);border:1px solid var(--border);padding:16px 14px;cursor:pointer;transition:all .2s;clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));position:relative;overflow:hidden}
+.lc:hover{transform:translateY(-2px);border-color:var(--border2)}
+.lc.sel{background:rgba(255,255,255,.03)}
+.lc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lc-col,transparent);opacity:0;transition:opacity .2s}
+.lc.sel::before{opacity:1}
+.lc-icon{font-size:2rem;display:block;margin-bottom:8px}
+.lc-name{font-size:1rem;font-weight:800;color:#fff;letter-spacing:.5px;margin-bottom:3px}
+.lc-pass{font-size:.62rem;font-family:'Share Tech Mono';margin-bottom:7px;font-weight:700}
+.lc-desc{font-size:.68rem;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.lc-feats{display:flex;flex-direction:column;gap:3px}
+.lf{font-size:.63rem;display:flex;align-items:center;gap:5px}
+.lf.on{color:var(--text)}.lf.off{color:var(--text3)}
+.pin-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);padding:12px 16px;flex-wrap:wrap}
+.pin-lbl{font-size:.65rem;color:var(--text2);font-family:'Share Tech Mono';letter-spacing:.5px;flex-shrink:0}
+.pin-in{background:var(--bg3);border:1px solid var(--border2);color:var(--accent);font-family:'Share Tech Mono';font-size:1rem;padding:7px 12px;width:90px;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s}
+.pin-in:focus{border-color:var(--accent)}
+.pin-btn{background:var(--purple);color:#fff;border:none;font-family:'Barlow Condensed';font-size:.8rem;font-weight:800;padding:9px 20px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:all .15s;display:flex;align-items:center;gap:7px}
+.pin-btn:hover{filter:brightness(1.15)}
+.pin-err{font-size:.63rem;color:var(--red);font-family:'Share Tech Mono';margin-left:8px;display:none}
+.pin-hint{font-size:.58rem;color:var(--text3);font-family:'Share Tech Mono';margin-left:auto}
+
+/* ══════════════════════════
+   SCREEN 1 — KEYWORD SWEEP
+══════════════════════════ */
+.hud-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.hc{display:flex;align-items:center;gap:7px;padding:7px 14px;border-right:1px solid var(--border);flex-shrink:0}
+.hc:last-child{border-right:none}
+.hc-lbl{font-size:.54rem;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;font-family:'Share Tech Mono'}
+.hc-val{font-size:.86rem;font-weight:800;font-family:'Share Tech Mono'}
+.hp-bar{width:72px;height:4px;background:rgba(255,255,255,.06)}
+.hp-fill{height:4px;transition:width .4s,background .4s}
+.timer-wrap{display:flex;align-items:center;gap:6px}
+.timer-ring{position:relative;width:30px;height:30px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono';font-size:.56rem;font-weight:800}
+
+.sweep-brief{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.sb-badge{font-size:.6rem;font-weight:800;padding:3px 9px;font-family:'Share Tech Mono';letter-spacing:.5px;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px));flex-shrink:0}
+.sb-txt{font-size:.68rem;color:var(--text);flex:1;line-height:1.45}
+.sb-txt strong{color:#fff}.sb-txt .warn{color:var(--red)}
+
+.sweep-grid{display:grid;grid-template-columns:1fr 170px;gap:12px;padding:12px}
+.paper{background:linear-gradient(135deg,#f5f0e8,#ede8dc);border-radius:2px;padding:16px 18px;position:relative;border:1px solid #c8b89a;box-shadow:2px 3px 12px rgba(0,0,0,.5)}
+.paper::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 22px,rgba(0,0,100,.05) 22px,rgba(0,0,100,.05) 23px);border-radius:2px;pointer-events:none}
+.p-hdr{display:flex;justify-content:space-between;margin-bottom:8px}
+.p-logo{font-size:.62rem;color:#6b4c20;font-family:serif;display:flex;align-items:center;gap:4px}
+.p-src{font-size:.55rem;color:#8b6a40;text-align:right;line-height:1.35;font-family:serif}
+.p-txt{font-size:.82rem;color:#1a1a1a;line-height:1.95;font-family:serif;-webkit-user-select:none;user-select:none}
+.qnum{display:inline-block;border:1.5px solid #c0392b;border-radius:50%;padding:0 4px;font-weight:700;color:#c0392b;margin-right:3px}
+.part{color:#c0392b;font-weight:700}
+.w{cursor:pointer;padding:1px 2px;border-radius:2px;transition:all .12s;display:inline}
+.w:hover:not(.done){background:rgba(200,180,80,.2)}
+.w.pre-hl{background:rgba(180,160,60,.22);border-bottom:2px solid #888;padding:1px 4px;margin:0 1px;font-weight:600;color:#3a2800;cursor:pointer}
+.w.pre-hl:hover:not(.done){background:rgba(200,180,80,.35)}
+.w.sel{background:rgba(52,152,219,.28)!important;border-bottom:2px solid var(--blue)!important;color:#003060!important;font-weight:700}
+.w.correct{background:rgba(30,150,80,.28)!important;border-bottom:2px solid #2ecc71!important;color:#0a3a10!important;cursor:default;pointer-events:none}
+.w.correct::after{content:'✓';font-size:.55rem;vertical-align:super;color:#27ae60;font-weight:900;margin-left:1px}
+.w.wrong{background:rgba(200,30,30,.28)!important;border-bottom:2px solid var(--red)!important;color:#5a0000!important;cursor:default;pointer-events:none;animation:wshake .3s}
+.w.wrong::after{content:'✗';font-size:.55rem;vertical-align:super;color:#c0392b;font-weight:900;margin-left:1px}
+.w.missed{background:rgba(243,156,18,.2)!important;border-bottom:2px dashed var(--amber)!important;color:#3a1800!important;cursor:default;pointer-events:none}
+.w.missed::after{content:'⚠';font-size:.55rem;vertical-align:super;color:var(--amber);margin-left:1px}
+@keyframes wshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+
+.sweep-sidebar{display:flex;flex-direction:column;gap:7px}
+.sc{background:var(--panel);border:1px solid var(--border);padding:9px;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+.sc-title{font-size:.56rem;font-weight:700;letter-spacing:1.5px;color:var(--accent);font-family:'Share Tech Mono';text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px}
+.sc-title.red{color:var(--red)}
+.fi{display:flex;gap:5px;padding:4px 0;border-bottom:1px solid var(--border);animation:fadein .25s ease-out;font-size:.63rem}
+.fi:last-child{border-bottom:none}
+.fi-text{color:var(--text);line-height:1.35}
+.mi{font-size:.6rem;color:var(--red);font-family:'Share Tech Mono';padding:3px 0;border-bottom:1px solid var(--border);animation:fadein .25s}
+.mi:last-child{border-bottom:none}
+.empty-msg{font-size:.57rem;color:var(--text3);font-style:italic;font-family:'Share Tech Mono'}
+@keyframes fadein{from{opacity:0;transform:translateX(-4px)}to{opacity:1}}
+
+.sel-box{background:var(--bg3);border:1px solid var(--border);padding:7px;text-align:center}
+.sel-num{font-size:1.4rem;font-weight:800;font-family:'Share Tech Mono';color:var(--blue);display:block}
+.sel-lbl{font-size:.55rem;color:var(--text2);font-family:'Share Tech Mono'}
+.submit-btn{width:100%;padding:9px;font-size:.74rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--panel2);color:var(--text2);border:1px solid var(--border)}
+.submit-btn.ready{background:linear-gradient(135deg,var(--blue),#1a6fa8);color:#fff;border:none}
+.submit-btn:hover.ready{filter:brightness(1.1)}
+
+.p-legend{margin-top:6px;font-size:.58rem;color:var(--text2);font-family:'Share Tech Mono';display:flex;gap:10px;flex-wrap:wrap}
+
+/* ══════════════════════════
+   SWEEP RESULT OVERLAY
+══════════════════════════ */
+.s-overlay{position:absolute;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center;animation:fadein .4s ease-out}
+.s-overlay.show{display:flex}
+.so-fail{background:rgba(6,2,2,.93)}
+.so-pass{background:rgba(2,6,2,.91)}
+.so-icon{font-size:3.5rem;margin-bottom:8px;animation:iconpop .5s ease-out}
+@keyframes iconpop{0%{transform:scale(0) rotate(-15deg)}70%{transform:scale(1.15) rotate(4deg)}100%{transform:scale(1)}}
+.so-title{font-family:'Barlow Condensed';font-size:1.7rem;font-weight:900;letter-spacing:3px;margin-bottom:5px}
+.so-sub{font-size:.73rem;color:var(--text2);margin-bottom:12px;line-height:1.5;max-width:340px}
+.so-stats{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.ostat{background:var(--panel);border:1px solid var(--border);padding:7px 14px;font-family:'Share Tech Mono';font-size:.63rem;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px))}
+.ostat-val{font-size:.95rem;font-weight:800;display:block;margin-bottom:1px}
+.so-missed{background:var(--panel);border:1px solid var(--border2);padding:9px 12px;margin-bottom:12px;text-align:left;max-width:380px;width:100%;max-height:120px;overflow-y:auto}
+.so-missed-title{font-size:.56rem;color:var(--accent);font-family:'Share Tech Mono';letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.so-missed-row{display:flex;gap:6px;font-size:.64rem;padding:3px 0;border-bottom:1px solid var(--border)}
+.so-missed-row:last-child{border-bottom:none}
+.ov-btn{padding:9px 20px;font-size:.76rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));margin:4px;transition:all .15s}
+.btn-retry{background:var(--red);color:#fff}
+.btn-green{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000}
+.btn-grey{background:var(--panel2);color:var(--text2);border:1px solid var(--border2)}
+
+/* ══════════════════════════
+   SCREEN 2 — STEP-BY-STEP
+══════════════════════════ */
+#s2{padding:12px}
+
+.mission-brief{background:var(--panel);border:1px solid var(--border2);margin-bottom:12px;overflow:hidden;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.mb-hdr{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,rgba(124,181,24,.1),transparent);border-bottom:1px solid var(--border);padding:8px 16px}
+.mb-tag{font-size:.58rem;font-weight:700;letter-spacing:2px;color:var(--accent);font-family:'Share Tech Mono';text-transform:uppercase}
+.mb-body{display:flex;align-items:stretch;flex-wrap:wrap}
+.mb-intel{padding:12px 16px;flex:1;min-width:220px}
+.mb-code{font-size:.58rem;color:var(--text2);letter-spacing:1.5px;font-family:'Share Tech Mono';margin-bottom:4px}
+.mb-title{font-size:1rem;font-weight:700;color:#fff;letter-spacing:.4px;margin-bottom:5px}
+.mb-title span{color:var(--red)}
+.mb-desc{font-size:.7rem;color:var(--text2);line-height:1.55;margin-bottom:9px}
+.mb-desc strong{color:var(--text)}
+.mb-rewards{display:flex;gap:6px;flex-wrap:wrap}
+.rew{display:flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid var(--border2);background:var(--accent-l);font-size:.63rem;font-weight:700;color:var(--accent);clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px))}
+.mb-actions{padding:12px 14px;border-left:1px solid var(--border);min-width:140px;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.btn-deploy{background:var(--accent);color:#000;font-weight:800;font-size:.8rem;padding:10px 16px;border:none;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px));transition:all .15s;width:100%;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-deploy:hover{background:var(--accent2)}
+.btn-recon{background:transparent;color:var(--text2);font-size:.72rem;font-weight:700;padding:7px;border:1px solid var(--border2);cursor:pointer;letter-spacing:1px;text-transform:uppercase;width:100%}
+
+/* PROGRESS BAR */
+.prog-strip{display:flex;align-items:center;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:7px 14px;font-size:.6rem;font-weight:700;letter-spacing:.5px;color:var(--text2);font-family:'Share Tech Mono';margin-bottom:12px}
+.prog-nodes{display:flex;gap:0;flex:1;margin:0 12px}
+.pn{display:flex;align-items:center;flex:1}
+.pn-dot{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;clip-path:polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%);font-size:.56rem;font-weight:800;font-family:'Share Tech Mono';background:var(--bg3);color:var(--text2);transition:all .3s}
+.pn-dot.done-d{background:rgba(124,181,24,.2);color:var(--accent);border-color:var(--accent)}
+.pn-dot.act-d{background:var(--accent);color:#000}
+.pn-line{flex:1;height:1px;background:var(--border);transition:background .4s}
+.pn-line.done-l{background:var(--accent);opacity:.5}
+
+/* OBJ TABS */
+.obj-tabs{display:flex;margin-bottom:12px;border-bottom:1px solid var(--border)}
+.otab{flex:1;padding:9px 14px;font-size:.73rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.otab.act{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-l)}
+.otab.act-b{color:var(--amber);border-bottom-color:var(--amber);background:var(--amber-l)}
+
+/* STEP CARDS */
+.step{background:var(--panel);border:1px solid var(--border);overflow:hidden;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));margin-bottom:6px;transition:all .3s}
+.step.locked{opacity:.32;pointer-events:none}
+.step.active{border-color:var(--border2);background:var(--panel2)}
+.step.done-s{border-color:rgba(124,181,24,.3)}
+.step-hdr{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)}
+.snum{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);font-size:.76rem;font-weight:800;color:var(--text2);font-family:'Share Tech Mono';clip-path:polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%);transition:all .3s}
+.step.active .snum{background:var(--accent-l);color:var(--accent);border-color:var(--accent)}
+.step.done-s .snum{background:rgba(124,181,24,.2);color:var(--accent)}
+.step-name{flex:1;font-size:.84rem;font-weight:700;color:var(--text);letter-spacing:.3px}
+.sbadge{font-size:.57rem;font-weight:700;padding:2px 7px;letter-spacing:.5px;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px))}
+.sb-ready{background:var(--accent-l);color:var(--accent);border:1px solid rgba(124,181,24,.3)}
+.sb-locked{background:rgba(255,255,255,.03);color:var(--text3);border:1px solid var(--border)}
+.sb-done{background:rgba(124,181,24,.1);color:var(--accent)}
+.sb-amber{background:var(--amber-l);color:var(--amber);border:1px solid rgba(243,156,18,.3)}
+.step-body{padding:13px 15px;display:none}
+.step.active .step-body,.step.done-s .step-body{display:block}
+
+/* Step body elements */
+.eq{background:rgba(0,0,0,.4);border:1px solid var(--border2);padding:9px 13px;margin:8px 0;font-family:'Share Tech Mono';font-size:.78rem;color:#fff;line-height:1.7;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+.eq .dim{color:var(--text2);font-size:.7rem}
+.eq .hi{color:var(--accent2);font-weight:700}
+.eq .hia{color:var(--amber)}
+.eq .hir{color:var(--red)}
+.callout{display:flex;align-items:flex-start;gap:8px;border-l:3px solid var(--border2);padding:8px 12px;font-size:.7rem;color:var(--text);line-height:1.5;margin-top:8px;background:rgba(0,0,0,.2)}
+.callout.info{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.callout.warn{border-color:var(--amber);background:var(--amber-l);color:var(--amber)}
+.callout.ok{border-color:var(--accent);background:var(--accent-l)}
+.callout-i{flex-shrink:0;margin-top:1px}
+.model{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.mbox{flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border);padding:10px 12px;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+.mbox-t{font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Share Tech Mono';margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.mbox-t.ta{color:var(--accent)}.mbox-t.tb{color:var(--amber)}
+.urow{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.ulbl{font-size:.64rem;font-weight:700;min-width:54px;color:var(--text2)}
+.ub{height:15px;border:1px solid;font-size:.45rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.ub.g{background:rgba(124,181,24,.2);border-color:var(--accent);color:var(--accent)}
+.ub.b{background:rgba(52,152,219,.2);border-color:var(--blue);color:var(--blue)}
+.ub.a{background:rgba(243,156,18,.2);border-color:var(--amber);color:var(--amber)}
+.ub.r{background:rgba(231,76,60,.2);border-color:var(--red);color:var(--red)}
+.ub.t{background:rgba(20,184,166,.2);border-color:var(--teal);color:var(--teal)}
+.unote{font-size:.62rem;color:var(--text2);margin-left:3px}
+
+.ans-zone{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--accent-l),rgba(0,0,0,.3));border:1px solid var(--border2);padding:10px 14px;flex-wrap:wrap;margin-top:8px}
+.ans-lbl{font-size:.64rem;font-weight:700;color:var(--text2);text-transform:uppercase;font-family:'Share Tech Mono';flex-shrink:0}
+.ans-val{font-size:1rem;font-weight:800;color:var(--accent2);font-family:'Share Tech Mono';letter-spacing:.5px}
+.ans-xp{font-size:.62rem;color:var(--amber);font-family:'Share Tech Mono';font-weight:700;margin-left:auto}
+.step-foot{display:flex;justify-content:flex-end;margin-top:10px;gap:7px;flex-wrap:wrap}
+.btn-confirm{background:var(--accent);color:#000;font-weight:800;font-size:.74rem;padding:8px 16px;border:none;cursor:pointer;letter-spacing:1.2px;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));transition:all .15s;display:flex;align-items:center;gap:6px}
+.btn-confirm:hover{background:var(--accent2)}
+.btn-confirm.amber{background:var(--amber);color:#000}
+.btn-next{background:var(--panel2);color:var(--accent);border:1px solid var(--border2);font-weight:700;font-size:.7rem;padding:8px 14px;cursor:pointer;letter-spacing:.8px;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));transition:all .15s}
+
+/* ══════════════════════════
+   SCREEN 3 — MISSION COMPLETE
+══════════════════════════ */
+#s3{padding:22px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.mc-icon{font-size:4rem;margin-bottom:10px;animation:iconpop .6s ease-out}
+.mc-title{font-family:'Barlow Condensed';font-size:2rem;font-weight:900;letter-spacing:4px;color:var(--accent2);margin-bottom:6px}
+.mc-sub{font-size:.78rem;color:var(--text2);margin-bottom:16px;line-height:1.55;max-width:400px}
+.mc-rewards{display:flex;gap:12px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+.mc-rew{background:var(--panel);border:1px solid var(--border2);padding:12px 18px;text-align:center;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
+.mc-rew-val{font-size:1.3rem;font-weight:800;font-family:'Share Tech Mono';display:block;margin-bottom:3px}
+.mc-rew-lbl{font-size:.6rem;color:var(--text2);font-family:'Share Tech Mono';letter-spacing:.5px}
+.mc-answers{background:var(--panel);border:1px solid var(--border2);padding:14px 18px;margin-bottom:16px;width:100%;max-width:440px;text-align:left;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.mc-ans-title{font-size:.58rem;color:var(--accent);font-family:'Share Tech Mono';letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:5px}
+.mc-ans-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}
+.mc-ans-row:last-child{border-bottom:none}
+.mc-ans-tag{font-size:.6rem;font-weight:700;padding:2px 9px;clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px));font-family:'Share Tech Mono';flex-shrink:0}
+.mc-ans-txt{font-size:.8rem;font-weight:700;color:#fff;font-family:'Share Tech Mono'}
+.mc-btn{padding:11px 28px;font-size:.84rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px));margin:5px;transition:all .15s}
+
+/* FLOATING POPS */
+.pop{position:fixed;font-family:'Share Tech Mono';font-size:.82rem;font-weight:800;pointer-events:none;animation:popf 1.1s ease-out forwards;z-index:999}
+.pop.pos{color:var(--accent2)}.pop.neg{color:#ff5555}.pop.xp{color:var(--amber)}
+@keyframes popf{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(1.2)}}
+@keyframes screenShake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,3px)}80%{transform:translate(3px,-1px)}}
+.shaking{animation:screenShake .3s ease-in-out}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+
+  <!-- GLOBAL HEADER -->
+  <div class="g-hdr">
+    <div class="g-logo"><em>D</em>-WOLF</div>
+    <div class="g-sep"></div>
+    <div class="g-title" id="g-title">MKG-007 · COIN VAULT HEIST</div>
+    <div class="g-phase-strip">
+      <div class="gph active" id="gph0"><div class="gph-num">0</div>SETUP</div>
+      <div class="gph" id="gph1"><div class="gph-num">1</div>SWEEP</div>
+      <div class="gph" id="gph2"><div class="gph-num">2</div>SOLVE</div>
+      <div class="gph" id="gph3"><div class="gph-num">3</div>DEBRIEF</div>
+    </div>
+    <div class="g-hud">
+      <div class="hud-pill" id="g-xp" style="color:var(--amber)">⚡ 0 XP</div>
+      <div class="hud-pill" id="g-pts" style="color:var(--accent)">▲ 100 PTS</div>
+      <div class="hud-pill" style="font-size:.6rem;color:var(--text2);font-family:'Share Tech Mono'"><span class="live-dot" style="margin-right:3px"></span>LIVE</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 0: PARENT SETUP -->
+  <div class="screen active" id="s0">
+    <div style="padding:18px">
+      <div class="parent-banner">
+        <svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="7" width="10" height="6" rx="1" fill="none" stroke="#8b5cf6" stroke-width="1.2"/><path d="M4 7L4 5Q4 2 7 2Q10 2 10 5L10 7" fill="none" stroke="#8b5cf6" stroke-width="1.2"/><circle cx="7" cy="10" r="1.2" fill="#8b5cf6"/></svg>
+        <span class="pb-tag">PARENT COMMAND</span>
+        <span class="pb-txt">Select operative difficulty level. Enter PIN to deploy. Kids cannot change level without PIN.</span>
+      </div>
+      <div class="level-grid">
+        <div class="lc sel" id="lc-easy" style="--lc-col:var(--accent);border-color:var(--accent)" onclick="selectLevel('easy')">
+          <span class="lc-icon">🟢</span>
+          <div class="lc-name" style="color:var(--accent)">EASY</div>
+          <div class="lc-pass" style="color:var(--accent)">PASS: 60% accuracy</div>
+          <div class="lc-desc">15 words pre-highlighted. Find the 6 real keywords from the pool. Gentle introduction.</div>
+          <div class="lc-feats">
+            <div class="lf on"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Pre-highlighted words</div>
+            <div class="lf on"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Hints in intel feed</div>
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>No time limit</div>
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>−15 pts per mine</div>
+          </div>
+        </div>
+        <div class="lc" id="lc-medium" style="--lc-col:var(--amber)" onclick="selectLevel('medium')">
+          <span class="lc-icon">🟡</span>
+          <div class="lc-name" style="color:var(--amber)">MEDIUM</div>
+          <div class="lc-pass" style="color:var(--amber)">PASS: 75% accuracy</div>
+          <div class="lc-desc">Plain paper, no highlights. Kid taps freely to find and submit the 6 key words.</div>
+          <div class="lc-feats">
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>No pre-highlights</div>
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>No category hints</div>
+            <div class="lf on"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>No time limit</div>
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>−20 pts per wrong</div>
+          </div>
+        </div>
+        <div class="lc" id="lc-hard" style="--lc-col:var(--red)" onclick="selectLevel('hard')">
+          <span class="lc-icon">🔴</span>
+          <div class="lc-name" style="color:var(--red)">HARD</div>
+          <div class="lc-pass" style="color:var(--red)">PASS: 90% accuracy</div>
+          <div class="lc-desc">No hints. 60-second timer. Hardest scoring. No retry on fail — one shot only.</div>
+          <div class="lc-feats">
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>No hints at all</div>
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>60s TIMER</div>
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>−30 pts per wrong</div>
+            <div class="lf off"><svg width="9" height="9" viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="1" x2="1" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>No retry on FAIL</div>
+          </div>
+        </div>
+      </div>
+      <div class="pin-row">
+        <svg width="13" height="13" viewBox="0 0 13 13"><rect x="1.5" y="6.5" width="10" height="5.5" rx="1" fill="none" stroke="#8b5cf6" stroke-width="1.2"/><path d="M3.5 6.5L3.5 4.5Q3.5 1.5 6.5 1.5Q9.5 1.5 9.5 4.5L9.5 6.5" fill="none" stroke="#8b5cf6" stroke-width="1.2"/><circle cx="6.5" cy="9.2" r="1.2" fill="#8b5cf6"/></svg>
+        <span class="pin-lbl">PARENT PIN:</span>
+        <input class="pin-in" type="password" id="pin-in" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter')confirmPin()">
+        <button class="pin-btn" onclick="confirmPin()">
+          <svg width="11" height="11" viewBox="0 0 11 11"><polygon points="2,2 9,5.5 2,9" fill="currentColor"/></svg>
+          DEPLOY LEVEL
+        </button>
+        <span class="pin-err" id="pin-err">⚠ Wrong PIN</span>
+        <span class="pin-hint">Demo PIN: <strong style="color:var(--purple)">1234</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: KEYWORD SWEEP -->
+  <div class="screen" id="s1">
+    <!-- HUD -->
+    <div class="hud-bar">
+      <div class="hc"><div><div class="hc-lbl">INTEL</div><div class="hc-val" id="h-intel" style="color:var(--accent)">0/6</div></div></div>
+      <div class="hc"><div><div class="hc-lbl">WRONG</div><div class="hc-val" id="h-wrong" style="color:var(--red)">0</div></div></div>
+      <div class="hc"><div><div class="hc-lbl">SCORE</div><div class="hc-val" id="h-pts" style="color:var(--amber)">100</div></div></div>
+      <div class="hc"><div><div class="hc-lbl">SQUAD HP</div><div class="hp-bar"><div class="hp-fill" id="hp-fill" style="width:100%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></div></div>
+      <div class="hc"><div><div class="hc-lbl">ACCURACY</div><div class="hc-val" id="h-acc" style="color:var(--text2)">—</div></div></div>
+      <div class="hc" id="timer-cell" style="display:none">
+        <div class="timer-wrap">
+          <div class="timer-ring">
+            <svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="3"/><circle id="t-arc" cx="15" cy="15" r="13" fill="none" stroke="var(--red)" stroke-width="3" stroke-dasharray="81.7" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 15 15)"/></svg>
+            <div class="timer-val" id="t-val" style="color:var(--red)">60</div>
+          </div>
+        </div>
+      </div>
+      <div class="hc" style="margin-left:auto"><button onclick="goSetup()" style="background:transparent;border:1px solid var(--border);color:var(--text2);font-size:.58rem;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Share Tech Mono';letter-spacing:.5px">⬅ CHANGE LVL</button></div>
+    </div>
+
+    <!-- SWEEP BRIEF -->
+    <div class="sweep-brief">
+      <span class="sb-badge" id="sb-badge">EASY</span>
+      <span class="sb-txt" id="sb-txt">Tap <strong>highlighted words</strong> to extract intel. Find all <strong>6 key words</strong> — <span class="warn">wrong taps = mines = −15 pts!</span> Need 60% to pass.</span>
+    </div>
+
+    <!-- SWEEP GRID -->
+    <div class="sweep-grid">
+      <div>
+        <div class="paper">
+          <div class="p-hdr">
+            <div class="p-logo"><svg width="11" height="11" viewBox="0 0 11 11"><circle cx="5.5" cy="5.5" r="4.5" fill="none" stroke="#6b4c20" stroke-width="1"/><circle cx="5.5" cy="5.5" r="2" fill="none" stroke="#6b4c20" stroke-width="1"/><circle cx="5.5" cy="5.5" r=".7" fill="#6b4c20"/></svg> pitaya</div>
+            <div class="p-src">Past Year Prelim · C2S4<br>RATIO, FRACTION AND PERCENTAGE</div>
+          </div>
+          <div class="p-txt" id="p-txt"></div>
+        </div>
+        <div class="p-legend" id="p-legend"></div>
+      </div>
+      <div class="sweep-sidebar">
+        <div class="sc"><div class="sc-title">// INTEL FEED</div><div id="intel-feed"><div class="empty-msg">— awaiting taps —</div></div></div>
+        <div class="sc"><div class="sc-title red">// WRONG PICKS</div><div id="wrong-feed"><div class="empty-msg">— none yet —</div></div></div>
+        <div class="sel-box" id="sel-box" style="display:none"><span class="sel-num" id="sel-num">0</span><span class="sel-lbl">WORDS SELECTED</span></div>
+        <button class="submit-btn" id="submit-btn" onclick="submitSweep()" style="display:none">
+          <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="2,2 8,5 2,8" fill="currentColor"/></svg>SUBMIT INTEL
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT OVERLAY -->
+    <div class="s-overlay" id="s1-overlay"></div>
+  </div>
+
+  <!-- SCREEN 2: STEP-BY-STEP SOLVER -->
+  <div class="screen" id="s2">
+
+    <!-- MISSION BRIEF -->
+    <div style="padding:12px 12px 0">
+      <div class="mission-brief">
+        <div class="mb-hdr">
+          <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="var(--accent)" stroke-width="1.2"/><path d="M3 6Q6 3 9 6Q6 9 3 6Z" fill="none" stroke="var(--accent)" stroke-width="1"/></svg>
+          <span class="mb-tag">// SITREP — OPERATION COIN VAULT HEIST //</span>
+        </div>
+        <div class="mb-body">
+          <div class="mb-intel">
+            <div class="mb-code">MISSION: MKG-007 · MATHS KINGDOM · RATIO + FRACTIONS + VALUE</div>
+            <div class="mb-title">Vault Intel Confirmed. <span>Two vaults — crack them both!</span></div>
+            <div class="mb-desc">D-Wolf has secured the keyword intel. Both vaults hold <strong>n coins each</strong>. Vault Alpha value = $86.40 → find n. Vault Bravo value = $50.10 → find 20¢ coins. Deploy step-by-step.</div>
+            <div class="mb-rewards">
+              <div class="rew">⚡ +80 XP</div>
+              <div class="rew">▲ +50 PTS</div>
+              <div class="rew">🪙 COIN VAULT BADGE</div>
+            </div>
+          </div>
+          <div class="mb-actions">
+            <button class="btn-deploy" onclick="startSolving()">
+              <svg width="11" height="11" viewBox="0 0 11 11"><polygon points="2,2 9,5.5 2,9" fill="#000"/></svg>
+              DEPLOY NOW
+            </button>
+            <button class="btn-recon" onclick="goSetup()">⬅ CHANGE LEVEL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="solver-area" style="display:none;padding:0 12px 12px">
+      <!-- Progress -->
+      <div class="prog-strip">
+        OBJ-A:
+        <div class="prog-nodes">
+          <div class="pn"><div class="pn-dot act-d" id="pd1">1</div><div class="pn-line" id="pl1"></div></div>
+          <div class="pn"><div class="pn-dot" id="pd2">2</div><div class="pn-line" id="pl2"></div></div>
+          <div class="pn"><div class="pn-dot" id="pd3">3</div><div class="pn-line" id="pl3"></div></div>
+          <div class="pn-dot" id="pd4">4</div>
+        </div>
+        <span id="prog-lbl">STEP 1 OF 4</span>
+      </div>
+
+      <!-- OBJ TABS -->
+      <div class="obj-tabs">
+        <div class="otab act" id="tab-a" onclick="switchObj('a')">
+          <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,4 9,8 5,10 1,8 1,4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+          OBJ-A: Find total coins
+        </div>
+        <div class="otab" id="tab-b" onclick="switchObj('b')">
+          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5L8 5M5 2L8 5L5 8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          OBJ-B: Find 20¢ coins
+        </div>
+      </div>
+
+      <!-- OBJ-A STEPS -->
+      <div id="obj-a">
+        <div class="step active" id="st1">
+          <div class="step-hdr"><div class="snum" id="sn1">01</div><div class="step-name">Recon Vault Alpha — map the coin types</div><span class="sbadge sb-ready" id="sba1">▶ ACTIVE</span></div>
+          <div class="step-body">
+            <div class="callout info"><svg class="callout-i" width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="6.5" y1="4.5" x2="6.5" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="6.5" cy="3" r=".7" fill="currentColor"/></svg><div>Both vaults hold <strong style="color:#fff">n coins each</strong>. Keyword sweep confirmed: Vault Alpha = ¼ × 10¢ + ¾ × 50¢. Total value = $86.40. We solve for n.</div></div>
+            <div class="model"><div class="mbox"><div class="mbox-t ta">VAULT ALPHA — n COINS</div><div class="urow"><div class="ulbl">10¢ coins:</div><div class="ub g" style="width:38px">¼n</div><span class="unote">= n ÷ 4</span></div><div class="urow"><div class="ulbl">50¢ coins:</div><div class="ub b" style="width:56px">¾n</div><span class="unote">= the rest</span></div><div class="urow" style="margin-top:4px;border-top:1px solid var(--border);padding-top:4px"><div class="ulbl">TOTAL:</div><div class="ub g">¼n</div><div class="ub b" style="width:52px">¾n</div><span class="unote">= n ✓</span></div></div></div>
+            <div class="step-foot"><button class="btn-confirm" onclick="advA(1)"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3,7.5 8,1.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>CONFIRM & ADVANCE</button></div>
+          </div>
+        </div>
+        <div class="step locked" id="st2">
+          <div class="step-hdr"><div class="snum" id="sn2">02</div><div class="step-name">Calculate total value → set up equation</div><span class="sbadge sb-locked" id="sba2">🔒 LOCKED</span></div>
+          <div class="step-body">
+            <div class="callout warn"><svg class="callout-i" width="13" height="13" viewBox="0 0 13 13"><polygon points="6.5,1.5 12,11.5 1,11.5" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="6.5" y1="5" x2="6.5" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="6.5" cy="10" r=".7" fill="currentColor"/></svg><div>Tactic: convert <strong style="color:#fff">$86.40 → 8640 cents</strong> to keep all numbers whole. No decimals in the equation!</div></div>
+            <div class="eq"><span class="dim">10¢ group value: </span><span class="hi">¼n × 10 = 2.5n</span> cents<br><span class="dim">50¢ group value: </span><span class="hi">¾n × 50 = 37.5n</span> cents<br><span style="display:block;border-top:1px solid var(--border2);padding-top:5px;margin-top:5px"></span><span class="dim">Total: </span><span class="hi">2.5n + 37.5n = 40n</span> cents<br><span class="dim">Given: </span>$86.40 = <span class="hia">8640</span> cents</div>
+            <div class="step-foot"><button class="btn-confirm" onclick="advA(2)"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3,7.5 8,1.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>CONFIRM & ADVANCE</button></div>
+          </div>
+        </div>
+        <div class="step locked" id="st3">
+          <div class="step-hdr"><div class="snum" id="sn3">03</div><div class="step-name">Solve for n — crack the vault count</div><span class="sbadge sb-locked" id="sba3">🔒 LOCKED</span></div>
+          <div class="step-body">
+            <div class="eq"><span class="hi">40n</span> = <span class="hia">8640</span><br>n = 8640 ÷ 40<br>n = <span class="hi" style="font-size:1.1rem;font-weight:900">216</span></div>
+            <div class="model"><div class="mbox"><div class="mbox-t ta">VAULT ALPHA — VERIFIED: 216</div><div class="urow"><div class="ulbl">10¢ coins:</div><div class="ub g" style="width:32px">54</div><span class="unote">54×10 = 540¢</span></div><div class="urow"><div class="ulbl">50¢ coins:</div><div class="ub b" style="width:32px">162</div><span class="unote">162×50 = 8100¢</span></div><div style="font-size:.61rem;color:var(--text2);margin-top:5px;font-family:'Share Tech Mono'">540+8100 = 8640¢ = <strong style="color:var(--accent)">$86.40 ✓</strong></div></div></div>
+            <div class="callout ok"><svg class="callout-i" width="13" height="13" viewBox="0 0 13 13"><polygon points="6.5,1.5 12,11.5 1,11.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg><div>Both vaults hold <strong style="color:#fff">n = 216 coins</strong> — equal number stated in the original question!</div></div>
+            <div class="step-foot"><button class="btn-confirm" onclick="advA(3)"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3,7.5 8,1.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>CONFIRM & ADVANCE</button></div>
+          </div>
+        </div>
+        <div class="step locked" id="st4">
+          <div class="step-hdr"><div class="snum" id="sn4">04</div><div class="step-name">OBJ-A COMPLETE</div><span class="sbadge sb-locked" id="sba4">🔒 LOCKED</span></div>
+          <div class="step-body">
+            <div class="ans-zone"><svg width="15" height="15" viewBox="0 0 15 15"><polygon points="7.5,1 14,5 14,11 7.5,14 1,11 1,5" fill="none" stroke="var(--accent2)" stroke-width="1.5"/><polyline points="3.5,7.5 6.5,10.5 11.5,4.5" fill="none" stroke="var(--accent2)" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ans-lbl">OBJ-A:</span><span class="ans-val">Total coins in Box B = 216</span><span class="ans-xp">+40 XP ✦</span></div>
+            <div class="step-foot"><button class="btn-next" onclick="switchObj('b')">ADVANCE TO OBJ-B →</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OBJ-B STEPS -->
+      <div id="obj-b" style="display:none">
+        <div class="step active" id="sbd1">
+          <div class="step-hdr"><div class="snum" id="sbn1" style="background:var(--amber-l);color:var(--amber);border-color:var(--amber)">B1</div><div class="step-name">Map Vault Bravo — 216 coins, 3 types, let 20¢ = x</div><span class="sbadge sb-amber" id="sbb1">▶ ACTIVE</span></div>
+          <div class="step-body">
+            <div class="model"><div class="mbox"><div class="mbox-t tb">VAULT BRAVO — 216 COINS</div><div class="urow"><div class="ulbl">10¢ coins:</div><div class="ub a" style="width:44px">⅓×216</div><span class="unote">= <strong style="color:var(--amber)">72 coins</strong></span></div><div class="urow"><div class="ulbl" style="color:var(--red)">20¢ coins:</div><div class="ub r">x</div><span class="unote" style="color:var(--red)">← TARGET!</span></div><div class="urow"><div class="ulbl">50¢ coins:</div><div class="ub t" style="width:48px">144−x</div><span class="unote">= rest of 144</span></div></div></div>
+            <div class="callout info"><svg class="callout-i" width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="6.5" y1="4.5" x2="6.5" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="6.5" cy="3" r=".7" fill="currentColor"/></svg><div>10¢ = ⅓ × 216 = <strong style="color:#fff">72 coins</strong>. Remaining = 216−72 = <strong style="color:#fff">144 coins</strong>. Let 20¢ coins = <strong style="color:var(--red)">x</strong>, so 50¢ coins = <strong style="color:#fff">144−x</strong>.</div></div>
+            <div class="step-foot"><button class="btn-confirm amber" onclick="advB(1)"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3,7.5 8,1.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>CONFIRM & ADVANCE</button></div>
+          </div>
+        </div>
+        <div class="step locked" id="sbd2">
+          <div class="step-hdr"><div class="snum" id="sbn2">B2</div><div class="step-name">Strip 10¢ coins → set up value equation</div><span class="sbadge sb-locked" id="sbb2">🔒 LOCKED</span></div>
+          <div class="step-body">
+            <div class="callout warn"><svg class="callout-i" width="13" height="13" viewBox="0 0 13 13"><polygon points="6.5,1.5 12,11.5 1,11.5" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="6.5" y1="5" x2="6.5" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="6.5" cy="10" r=".7" fill="currentColor"/></svg><div>Tactic: strip the 10¢ coins first. Their value is fixed (72×10 = 720¢). That leaves only <strong style="color:#fff">one unknown x</strong> in the equation!</div></div>
+            <div class="eq"><span class="dim">$50.10 → </span><span class="hia">5010</span> cents total<br><span class="dim">10¢ coins: </span><span class="hia">72 × 10 = 720¢</span> (strip it out!)<br><span class="dim">Remaining: </span><span class="hir">5010 − 720 = 4290¢</span><br><span style="display:block;border-top:1px solid var(--border2);padding-top:5px;margin-top:5px"></span><span class="hi">20x</span> + <span class="hi">50(144 − x)</span> = <span class="hia">4290</span></div>
+            <div class="step-foot"><button class="btn-confirm amber" onclick="advB(2)"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3,7.5 8,1.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>CONFIRM & ADVANCE</button></div>
+          </div>
+        </div>
+        <div class="step locked" id="sbd3">
+          <div class="step-hdr"><div class="snum" id="sbn3">B3</div><div class="step-name">Solve for x — neutralise the target</div><span class="sbadge sb-locked" id="sbb3">🔒 LOCKED</span></div>
+          <div class="step-body">
+            <div class="eq">20x + 50(144 − x) = 4290<br>20x + <span class="hia">7200</span> − 50x = 4290<br>−30x = 4290 − 7200 = −2910<br>x = 2910 ÷ 30 = <span class="hi" style="font-size:1.1rem;font-weight:900">97</span></div>
+            <div class="model"><div class="mbox"><div class="mbox-t tb">VAULT BRAVO — VERIFIED</div><div class="urow"><div class="ulbl">10¢:</div><div class="ub a" style="width:30px">72</div><span class="unote">720¢</span></div><div class="urow"><div class="ulbl" style="color:var(--red)">20¢:</div><div class="ub r" style="width:30px">97</div><span class="unote" style="color:var(--red)">1940¢ ← ANS</span></div><div class="urow"><div class="ulbl">50¢:</div><div class="ub t" style="width:30px">47</div><span class="unote">2350¢</span></div><div style="font-size:.61rem;color:var(--text2);margin-top:5px;font-family:'Share Tech Mono'">720+1940+2350=5010¢=<strong style="color:var(--accent)">$50.10 ✓</strong></div></div></div>
+            <div class="step-foot"><button class="btn-confirm amber" onclick="advB(3)"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3,7.5 8,1.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>MISSION COMPLETE!</button></div>
+          </div>
+        </div>
+        <div class="step locked" id="sbd4">
+          <div class="step-hdr"><div class="snum" id="sbn4">★</div><div class="step-name">ALL OBJECTIVES CLEARED</div><span class="sbadge sb-locked" id="sbb4">🔒 LOCKED</span></div>
+          <div class="step-body">
+            <div class="ans-zone" style="margin-bottom:6px"><svg width="15" height="15" viewBox="0 0 15 15"><polygon points="7.5,1 14,5 14,11 7.5,14 1,11 1,5" fill="none" stroke="var(--accent2)" stroke-width="1.5"/><polyline points="3.5,7.5 6.5,10.5 11.5,4.5" fill="none" stroke="var(--accent2)" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ans-lbl">OBJ-A:</span><span class="ans-val">Box B = 216 coins</span><span class="ans-xp">+40 XP</span></div>
+            <div class="ans-zone" style="background:linear-gradient(135deg,var(--amber-l),rgba(0,0,0,.3));border-color:rgba(243,156,18,.35)"><svg width="15" height="15" viewBox="0 0 15 15"><polygon points="7.5,1 14,5 14,11 7.5,14 1,11 1,5" fill="none" stroke="var(--amber)" stroke-width="1.5"/><polyline points="3.5,7.5 6.5,10.5 11.5,4.5" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round"/></svg><span class="ans-lbl" style="color:var(--amber)">OBJ-B:</span><span class="ans-val" style="color:var(--amber)">20¢ coins = 97</span><span class="ans-xp">+60 XP</span></div>
+            <div class="step-foot"><button class="btn-confirm" onclick="goDebrief()"><svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3,7.5 8,1.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>VIEW DEBRIEF</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: DEBRIEF -->
+  <div class="screen" id="s3">
+    <div style="padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center">
+      <div style="font-size:3.5rem;margin-bottom:10px;animation:iconpop .6s ease-out">🐺</div>
+      <div style="font-family:'Barlow Condensed';font-size:2rem;font-weight:900;letter-spacing:4px;color:var(--accent2);margin-bottom:6px">MISSION COMPLETE</div>
+      <div style="font-size:.78rem;color:var(--text2);margin-bottom:18px;line-height:1.55;max-width:420px">MKG-007 — Coin Vault Heist — successfully executed. Both vaults cracked. D-Wolf operative status confirmed.</div>
+      <div id="debrief-rewards" style="display:flex;gap:12px;justify-content:center;margin-bottom:18px;flex-wrap:wrap"></div>
+      <div style="background:var(--panel);border:1px solid var(--border2);padding:14px 20px;margin-bottom:18px;max-width:440px;width:100%;text-align:left;clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))">
+        <div style="font-size:.57rem;color:var(--accent);font-family:'Share Tech Mono';letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:5px">// CONFIRMED ANSWERS</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:.62rem;font-weight:700;padding:2px 9px;background:var(--accent-l);color:var(--accent);border:1px solid rgba(124,181,24,.3);font-family:'Share Tech Mono';clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px))">OBJ-A</span>
+          <span style="font-size:.84rem;font-weight:700;color:#fff;font-family:'Share Tech Mono'">Total coins in Box B = <span style="color:var(--accent2)">216</span></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:7px 0">
+          <span style="font-size:.62rem;font-weight:700;padding:2px 9px;background:var(--amber-l);color:var(--amber);border:1px solid rgba(243,156,18,.3);font-family:'Share Tech Mono';clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px))">OBJ-B</span>
+          <span style="font-size:.84rem;font-weight:700;color:#fff;font-family:'Share Tech Mono'">20¢ coins in Box B = <span style="color:var(--amber)">97</span></span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <button class="mc-btn" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000" onclick="alert('Next mission loading... (connect to mission bank!)')">⚔ NEXT MISSION</button>
+        <button class="mc-btn" style="background:var(--panel2);color:var(--text2);border:1px solid var(--border2)" onclick="goSetup()">↺ REPLAY</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #app -->
+
+<script>
+/* ════════════════════════════════
+   GAME STATE
+════════════════════════════════ */
+let level='easy', totalXP=0, totalPts=100;
+let sweepCorrect=0, sweepWrong=0, sweepHP=100, sweepSubmitted=false;
+let sweepSelected=new Set(), sweepTapped=new Set();
+let timerInt=null, timeLeft=60;
+
+const PASS={easy:60,medium:75,hard:90};
+const PTS_C={easy:20,medium:25,hard:30};
+const PTS_W={easy:15,medium:20,hard:30};
+const HP_D={easy:20,medium:25,hard:34};
+
+/* ── KEYWORD DATA ── */
+const SEGS=[
+  {t:'10',qn:true},{t:' '},
+  {t:'Boxes A and B',id:'vault',key:true,intel:'🏦 TWO VAULTS — Box A (Vault Alpha) & Box B (Vault Bravo). Same n coins each!'},
+  {t:' contain an '},
+  {t:'equal number',id:'equal',key:true,intel:'⚡ SAME COUNT — both vaults hold n tokens. Find n in Vault Alpha → know Vault Bravo!'},
+  {t:' of coins. '},
+  {t:'¼',id:'qtr',key:true,intel:'📐 VAULT A SPLIT — ¼ × n are 10¢ GOLD tokens, ¾ × n are 50¢ HEAVY tokens'},
+  {t:' of the coins in '},
+  {t:'Box A',id:'boxa',key:false,mine:'Box A — just the label, not a data point. Key data is ¼ and $86.40'},
+  {t:' are '},
+  {t:'10-cent coins',id:'10a',key:false,mine:'10-cent in Box A — coin type, derived from ¼. Not standalone key'},
+  {t:' while '},
+  {t:'the rest',id:'rest',key:false,mine:'"the rest" — generic phrase, no numerical value'},
+  {t:' are 50-cent coins. '},
+  {t:'⅓',id:'third',key:false,mine:'⅓ in Box B — a distribution detail, not a mission-critical value on its own'},
+  {t:' of the coins in Box B are 10-cent coins while the rest are '},
+  {t:'20-cent',id:'20c',key:true,intel:'🔴 TARGET TOKEN — 20¢ RED tokens are OBJ-B\'s target. This is what we solve for!'},
+  {t:' and 50-cent coins.\n\n'},
+  {t:'(a) ',part:true},
+  {t:'Given that',id:'given',key:false,mine:'"Given that" is transition language, not a data keyword'},
+  {t:' the total value of all the coins in Box A is '},
+  {t:'$86.40',id:'v86',key:true,intel:'💰 VAULT A VALUE: $86.40 → 8640¢ → key equation to find n!'},
+  {t:', find the total number of coins in Box B.\n\n'},
+  {t:'(b) ',part:true},
+  {t:'The total value',id:'tv',key:false,mine:'"Total value" is generic — the actual key number is $50.10'},
+  {t:' of all the coins in Box B is '},
+  {t:'$50.10',id:'v5010',key:true,intel:'💰 VAULT B VALUE: $50.10 → 5010¢ → solve for 20¢ coins in OBJ-B!'},
+  {t:'. Find the number of 20-cent coins in Box B.'}
+];
+const EASY_HL=['vault','equal','qtr','boxa','10a','rest','third','20c','given','v86','tv','v5010','boxa'];
+const TRUE_KEYS=SEGS.filter(s=>s.key).map(s=>s.id);
+
+/* ════════════════════════════════
+   SCREEN NAVIGATION
+════════════════════════════════ */
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  for(let i=0;i<4;i++){
+    const ph=document.getElementById('gph'+i);
+    if(!ph)return;
+    ph.className='gph'+(i<n?' done':i===n?' active':'');
+  }
+}
+function goSetup(){
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+  showScreen(0);
+}
+
+/* ════════════════════════════════
+   SCREEN 0 — PARENT
+════════════════════════════════ */
+function selectLevel(l){
+  level=l;
+  ['easy','medium','hard'].forEach(x=>{
+    const lc=document.getElementById('lc-'+x);
+    if(!lc)return;
+    lc.classList.toggle('sel',x===l);
+    lc.style.borderColor=x===l?(x==='easy'?'var(--accent)':x==='medium'?'var(--amber)':'var(--red)'):'var(--border)';
+  });
+  document.getElementById('pin-err').style.display='none';
+  document.getElementById('pin-in').value='';
+}
+function confirmPin(){
+  const v=document.getElementById('pin-in').value;
+  if(v!=='1234'){document.getElementById('pin-err').style.display='inline';document.getElementById('pin-in').value='';return;}
+  startSweep();
+}
+document.getElementById('pin-in').addEventListener('keydown',e=>{if(e.key==='Enter')confirmPin();});
+
+/* ════════════════════════════════
+   SCREEN 1 — KEYWORD SWEEP
+════════════════════════════════ */
+function startSweep(){
+  sweepCorrect=0;sweepWrong=0;sweepHP=100;sweepSubmitted=false;
+  sweepSelected.clear();sweepTapped.clear();
+  document.getElementById('h-intel').textContent='0/6';
+  document.getElementById('h-wrong').textContent='0';
+  document.getElementById('h-pts').textContent=totalPts;
+  document.getElementById('h-acc').textContent='—';
+  document.getElementById('h-acc').style.color='var(--text2)';
+  document.getElementById('hp-fill').style.width='100%';
+  document.getElementById('hp-fill').style.background='linear-gradient(90deg,#10b981,#34d399)';
+  document.getElementById('intel-feed').innerHTML='<div class="empty-msg">— awaiting taps —</div>';
+  document.getElementById('wrong-feed').innerHTML='<div class="empty-msg">— none yet —</div>';
+  document.getElementById('s1-overlay').className='s-overlay';
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+
+  // Level config
+  const badge=document.getElementById('sb-badge');
+  const txt=document.getElementById('sb-txt');
+  const sbox=document.getElementById('sel-box');
+  const sbtn=document.getElementById('submit-btn');
+  const tcell=document.getElementById('timer-cell');
+  if(level==='easy'){
+    badge.textContent='EASY';badge.style.cssText='background:var(--accent-l);color:var(--accent);border:1px solid rgba(124,181,24,.3);font-size:.6rem;padding:3px 9px;font-family:\'Share Tech Mono\';font-weight:800;letter-spacing:.5px;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px))';
+    txt.innerHTML='Tap the <strong>highlighted words</strong> to extract intel. Find all <strong>6 real keywords</strong> — <span class="warn">wrong taps = mines = −15 pts!</span> Need 60% to pass.';
+    sbox.style.display='none';sbtn.style.display='none';tcell.style.display='none';
+    document.getElementById('p-legend').innerHTML='<span style="display:flex;align-items:center;gap:4px"><span style="background:rgba(180,160,60,.22);border-bottom:2px solid #888;padding:0 4px;font-family:serif;font-size:.65rem;color:#3a2800">word</span>= tap to check</span><span style="color:var(--text3);font-family:\'Share Tech Mono\';font-size:.58rem">Only some highlighted words are real intel!</span>';
+  } else if(level==='medium'){
+    badge.textContent='MEDIUM';badge.style.cssText='background:var(--amber-l);color:var(--amber);border:1px solid rgba(243,156,18,.3);font-size:.6rem;padding:3px 9px;font-family:\'Share Tech Mono\';font-weight:800;letter-spacing:.5px;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px))';
+    txt.innerHTML='<strong>No highlights.</strong> Tap any word to select it. Find the <strong>6 key intel words</strong> then submit. <span class="warn">Wrong words = −20 pts each.</span> Need 75%.';
+    sbox.style.display='block';sbtn.style.display='flex';tcell.style.display='none';
+    document.getElementById('p-legend').innerHTML='<span style="display:flex;align-items:center;gap:4px"><span style="background:rgba(52,152,219,.28);border-bottom:2px solid var(--blue);padding:0 4px;font-family:serif;font-size:.65rem;color:#003060">word</span>= selected (tap again to deselect)</span>';
+  } else {
+    badge.textContent='HARD';badge.style.cssText='background:var(--red-l);color:var(--red);border:1px solid rgba(231,76,60,.3);font-size:.6rem;padding:3px 9px;font-family:\'Share Tech Mono\';font-weight:800;letter-spacing:.5px;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px))';
+    txt.innerHTML='<strong>No hints. 60s timer.</strong> Find the <strong>6 key words</strong> and submit before time runs out. <span class="warn">−30 pts per wrong pick. No retry on FAIL.</span> Need 90%.';
+    sbox.style.display='block';sbtn.style.display='flex';tcell.style.display='flex';
+    document.getElementById('p-legend').innerHTML='<span style="color:var(--red);font-family:\'Share Tech Mono\';font-size:.58rem">⚠ 60 SECOND COUNTDOWN — select and submit fast!</span>';
+    startTimer();
+  }
+  renderPaper();
+  showScreen(1);
+}
+
+function renderPaper(){
+  let html='';
+  SEGS.forEach(sg=>{
+    if(sg.qn){html+='<span class="qnum">10</span>';return;}
+    if(sg.part){html+=`<span class="part">${sg.t}</span>`;return;}
+    if(sg.t==='\n\n'){html+='<br><br>';return;}
+    if(!sg.id){
+      if(level!=='easy'){
+        html+=sg.t.split(/(\s+)/).map(tok=>{
+          if(/^\s+$/.test(tok))return tok;
+          const wid='pw_'+Math.random().toString(36).slice(2,8);
+          return `<span class="w" id="${wid}" onclick="tapFreeWord(this,'${wid}')">${tok}</span>`;
+        }).join('');
+      } else {html+=sg.t;}
+      return;
+    }
+    const hl=level==='easy'&&EASY_HL.includes(sg.id);
+    if(level==='easy'){
+      html+=hl?`<span class="w pre-hl" id="kw-"+sg.id+"" onclick="tapEasy('${sg.id}')">${sg.t}</span>`:sg.t;
+    } else {
+      html+=`<span class="w" id="kw-"+sg.id+"" onclick="tapFree('${sg.id}')">${sg.t}</span>`;
+    }
+  });
+  document.getElementById('p-txt').innerHTML=html;
+}
+
+function tapEasy(id){
+  if(sweepTapped.has(id)||sweepSubmitted)return;
+  sweepTapped.add(id);
+  const sg=SEGS.find(s=>s.id===id);
+  const el=document.getElementById('kw-'+id);
+  if(!el)return;
+  const rect=el.getBoundingClientRect();
+  if(sg.key){sweepCorrect++;totalPts=Math.min(totalPts+PTS_C.easy,999);el.classList.add('done','correct');showPop(rect,'+'+PTS_C.easy,'pos');addIntel(sg.intel);}
+  else{sweepWrong++;totalPts=Math.max(0,totalPts-PTS_W.easy);sweepHP=Math.max(0,sweepHP-HP_D.easy);el.classList.add('done','wrong');showPop(rect,'💥 −'+PTS_W.easy,'neg');addWrong(sg.mine);shake();if(sweepHP<=0){setTimeout(()=>endSweep(),500);return;}}
+  updateSweepHUD();
+  if(sweepCorrect>=6)setTimeout(()=>endSweep(),400);
+}
+
+function tapFree(id){
+  if(sweepSubmitted)return;
+  const el=document.getElementById('kw-'+id);
+  if(sweepSelected.has(id)){sweepSelected.delete(id);el.classList.remove('sel');}
+  else{sweepSelected.add(id);el.classList.add('sel');}
+  updateSelCount();
+}
+function tapFreeWord(el,wid){
+  if(sweepSubmitted)return;
+  if(sweepSelected.has(wid)){sweepSelected.delete(wid);el.classList.remove('sel');}
+  else{sweepSelected.add(wid);el.classList.add('sel');}
+  updateSelCount();
+}
+function updateSelCount(){
+  document.getElementById('sel-num').textContent=sweepSelected.size;
+  document.getElementById('submit-btn').className='submit-btn'+(sweepSelected.size>0?' ready':'');
+}
+
+function submitSweep(){
+  if(sweepSubmitted||sweepSelected.size===0)return;
+  sweepSubmitted=true;
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+  sweepSelected.forEach(id=>{
+    const isPlain=id.startsWith('pw_');
+    const sg=SEGS.find(s=>s.id===id);
+    const el=document.getElementById('kw-'+id)||document.getElementById(id);
+    if(!el)return;  // already guarded
+    if(isPlain||!sg){sweepWrong++;totalPts=Math.max(0,totalPts-PTS_W[level]);sweepHP=Math.max(0,sweepHP-HP_D[level]);el.classList.remove('sel');el.classList.add('done','wrong');addWrong('Not a key term');}
+    else if(sg.key){sweepCorrect++;totalPts=Math.min(totalPts+PTS_C[level],999);el.classList.remove('sel');el.classList.add('done','correct');addIntel(sg.intel);}
+    else{sweepWrong++;totalPts=Math.max(0,totalPts-PTS_W[level]);sweepHP=Math.max(0,sweepHP-HP_D[level]);el.classList.remove('sel');el.classList.add('done','wrong');addWrong(sg.mine||'Not a key term');}
+  });
+  SEGS.filter(s=>s.key&&!sweepSelected.has(s.id)&&!sweepTapped.has(s.id)).forEach(s=>{
+    const el=document.getElementById('kw-'+s.id);
+    if(el)el.classList.add('done','missed');
+  });
+  updateSweepHUD();
+  setTimeout(()=>endSweep(),600);
+}
+
+function startTimer(){
+  timeLeft=60;
+  document.getElementById('t-val').textContent=60;
+  document.getElementById('t-arc').style.strokeDashoffset='0';
+  timerInt=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('t-val').textContent=timeLeft;
+    document.getElementById('t-arc').style.strokeDashoffset=(81.7*(1-timeLeft/60));
+    if(timeLeft<=10){document.getElementById('t-val').style.color='var(--red)';document.getElementById('t-arc').style.stroke='var(--red)';}
+    if(timeLeft<=0){clearInterval(timerInt);timerInt=null;if(!sweepSubmitted)submitSweep();}
+  },1000);
+}
+
+function endSweep(){
+  sweepSubmitted=true;
+  if(timerInt){clearInterval(timerInt);timerInt=null;}
+  const total=sweepCorrect+sweepWrong;
+  const acc=total>0?Math.round(sweepCorrect/total*100):0;
+  const pass=acc>=PASS[level]&&sweepHP>0&&(level!=='hard'||acc>=90);
+  const sweepXP=sweepCorrect*15+(pass?30:0);
+  totalXP+=sweepXP; totalPts+=(pass?50:0);
+  updateGlobalHUD();
+  updateSweepHUD();
+  const missed=SEGS.filter(s=>s.key&&!sweepSelected.has(s.id)&&!sweepTapped.has(s.id));
+  const statsHtml=`<div class="so-stats">
+    <div class="ostat"><span class="ostat-val" style="color:var(--accent)">${sweepCorrect}/6</span>INTEL</div>
+    <div class="ostat"><span class="ostat-val" style="color:var(--red)">${sweepWrong}</span>WRONG</div>
+    <div class="ostat"><span class="ostat-val" style="color:${acc>=PASS[level]?'var(--accent2)':'var(--red)'}">${acc}%</span>ACCURACY</div>
+    <div class="ostat"><span class="ostat-val" style="color:var(--amber)">+${sweepXP}</span>XP EARNED</div>
+  </div>`;
+  const missedHtml=missed.length?`<div class="so-missed"><div class="so-missed-title">// MISSED INTEL</div>${missed.map(s=>`<div class="so-missed-row"><span style="color:var(--amber);font-weight:700;min-width:80px">"${s.t}"</span><span style="color:var(--text2)">${s.intel}</span></div>`).join('')}</div>`:'';
+  const ov=document.getElementById('s1-overlay');
+  if(pass){
+    const msg=acc>=90?'🎖️ Flawless sweep! Wolf Alpha instincts.':acc>=75?'💪 Solid extraction — mission brief unlocked.':'✅ Passed at '+acc+'%. Brief unlocked — review missed intel.';
+    ov.className='s-overlay show so-pass';
+    ov.innerHTML=`<div class="so-icon">🐺</div><div class="so-title" style="color:var(--accent2)">INTEL SECURED</div><div class="so-sub">${msg}</div>${statsHtml}${missedHtml}<div><button class="ov-btn btn-green" onclick="proceedToSolve()">⚔ PROCEED TO SOLVE</button><button class="ov-btn" style="background:var(--panel2);color:var(--text2);border:1px solid var(--border2)" onclick="startSweep()">↺ RESWEEP</button></div>`;
+  } else {
+    const reason=sweepHP<=0?`Squad HP depleted — ${sweepWrong} wrong picks!`:timeLeft<=0?`Time expired with only ${sweepCorrect}/6 intel.`:`Accuracy ${acc}% below ${PASS[level]}% threshold.`;
+    const canRetry=level!=='hard';
+    ov.className='s-overlay show so-fail';
+    ov.innerHTML=`<div class="so-icon">💀</div><div class="so-title" style="color:var(--red)">MISSION FAIL</div><div class="so-sub">${reason} Study the missed intel below before retrying.</div>${statsHtml}${missedHtml}<div>${canRetry?`<button class="ov-btn btn-retry" onclick="startSweep()">↺ RETRY SWEEP</button>`:'<div style="font-size:.63rem;color:var(--red);font-family:\'Share Tech Mono\';margin-bottom:8px">NO RETRY ON HARD</div>'}<button class="ov-btn btn-grey" onclick="goSetup()">⚙ CHANGE LEVEL</button></div>`;
+  }
+}
+
+function proceedToSolve(){
+  showScreen(2);
+}
+
+/* ════════════════════════════════
+   SCREEN 2 — SOLVER
+════════════════════════════════ */
+function startSolving(){
+  document.getElementById('solver-area').style.display='block';
+  document.querySelector('.mission-brief').style.display='none';
+}
+
+function advA(n){
+  const st=document.getElementById('st'+n);
+  if(!st)return;
+  st.className='step done-s';
+  const sb=document.getElementById('sba'+n);if(sb){sb.className='sbadge sb-done';sb.textContent='✓ DONE';}
+  const sn=document.getElementById('sn'+n);if(sn){sn.style.background='rgba(124,181,24,.2)';sn.style.color='var(--accent)';sn.style.borderColor='var(--accent)';}
+  const nxt=document.getElementById('st'+(n+1));
+  if(nxt){
+    nxt.className='step active';
+    const nb=document.getElementById('sbd'+(n+1));if(nb){nb.className='sbadge sb-ready';nb.textContent='▶ ACTIVE';}
+    const nn=document.getElementById('sn'+(n+1));if(nn){nn.style.background='var(--accent-l)';nn.style.color='var(--accent)';nn.style.borderColor='var(--accent)';}
+    setTimeout(()=>nxt.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  }
+  // progress dots
+  const pd=document.getElementById('pd'+n);if(pd){pd.className='pn-dot done-d';pd.textContent='✓';}
+  const pl=document.getElementById('pl'+n);if(pl)pl.className='pn-line done-l';
+  const pnd=document.getElementById('pd'+(n+1));if(pnd)pnd.className='pn-dot act-d';
+  const labels=['','STEP 2 OF 4','STEP 3 OF 4','STEP 4 OF 4','OBJ-A COMPLETE'];
+  const pl2=document.getElementById('prog-lbl');if(pl2&&labels[n])pl2.textContent=labels[n];
+  if(n===3){totalXP+=40;totalPts+=20;updateGlobalHUD();}
+}
+function advB(n){
+  const st=document.getElementById('sbd'+n);
+  if(!st)return;
+  st.className='step done-s';
+  const badge=st.querySelector('.sbadge');if(badge){badge.className='sbadge sb-done';badge.textContent='✓ DONE';}
+  const nxt=document.getElementById('sbd'+(n+1));
+  if(nxt){
+    nxt.className='step active';
+    const nb=document.getElementById('sbb'+(n+1));if(nb){nb.className='sbadge sb-amber';nb.textContent='▶ ACTIVE';}
+    const nd=document.getElementById('sbn'+(n+1));if(nd){nd.style.background='var(--amber-l)';nd.style.color='var(--amber)';nd.style.borderColor='var(--amber)';}
+    setTimeout(()=>nxt.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  }
+  if(n===3){totalXP+=60;totalPts+=30;updateGlobalHUD();}
+}
+function switchObj(o){
+  document.getElementById('tab-a').className='otab'+(o==='a'?' act':'');
+  document.getElementById('tab-b').className='otab'+(o==='b'?' act-b':'');
+  document.getElementById('obj-a').style.display=o==='a'?'block':'none';
+  document.getElementById('obj-b').style.display=o==='b'?'block':'none';
+  if(o==='b'){
+    document.querySelector('.prog-strip').innerHTML=document.querySelector('.prog-strip').innerHTML.replace('OBJ-A:','OBJ-B:');
+    document.getElementById('prog-lbl').textContent='STEP B1 OF 3';
+  }
+}
+
+/* ════════════════════════════════
+   SCREEN 3 — DEBRIEF
+════════════════════════════════ */
+function goDebrief(){
+  totalXP+=20; totalPts+=50; updateGlobalHUD();
+  showScreen(3);
+  const rewards=document.getElementById('debrief-rewards');
+  const lvlBonus={easy:0,medium:50,hard:100}[level];
+  rewards.innerHTML=`
+    <div style="background:var(--panel);border:1px solid var(--border2);padding:12px 18px;text-align:center;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))"><span style="font-size:1.3rem;font-weight:800;font-family:'Share Tech Mono';color:var(--amber);display:block;margin-bottom:3px">+${totalXP}</span><span style="font-size:.6rem;color:var(--text2);font-family:'Share Tech Mono';letter-spacing:.5px">TOTAL XP</span></div>
+    <div style="background:var(--panel);border:1px solid var(--border2);padding:12px 18px;text-align:center;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))"><span style="font-size:1.3rem;font-weight:800;font-family:'Share Tech Mono';color:var(--accent);display:block;margin-bottom:3px">${totalPts}</span><span style="font-size:.6rem;color:var(--text2);font-family:'Share Tech Mono';letter-spacing:.5px">FINAL SCORE</span></div>
+    <div style="background:var(--panel);border:1px solid var(--border2);padding:12px 18px;text-align:center;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))"><span style="font-size:1.3rem;font-weight:800;color:#a78bfa;display:block;margin-bottom:3px">🪙</span><span style="font-size:.6rem;color:var(--text2);font-family:'Share Tech Mono';letter-spacing:.5px">COIN VAULT BADGE</span></div>
+    ${lvlBonus>0?`<div style="background:var(--panel);border:1px solid rgba(231,76,60,.3);padding:12px 18px;text-align:center;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))"><span style="font-size:1.3rem;font-weight:800;font-family:'Share Tech Mono';color:var(--red);display:block;margin-bottom:3px">+${lvlBonus}</span><span style="font-size:.6rem;color:var(--text2);font-family:'Share Tech Mono';letter-spacing:.5px">HARD MODE BONUS</span></div>`:''}`;
+}
+
+/* ════════════════════════════════
+   HUD HELPERS
+════════════════════════════════ */
+function updateSweepHUD(){
+  document.getElementById('h-intel').textContent=sweepCorrect+'/6';
+  document.getElementById('h-wrong').textContent=sweepWrong;
+  document.getElementById('h-pts').textContent=totalPts;
+  const tot=sweepCorrect+sweepWrong;
+  const acc=tot>0?Math.round(sweepCorrect/tot*100):0;
+  if(tot>0){document.getElementById('h-acc').textContent=acc+'%';document.getElementById('h-acc').style.color=acc>=PASS[level]?'var(--accent)':'var(--red)';}
+  document.getElementById('hp-fill').style.width=sweepHP+'%';
+  document.getElementById('hp-fill').style.background=sweepHP>60?'linear-gradient(90deg,#10b981,#34d399)':sweepHP>30?'linear-gradient(90deg,#f59e0b,#fbbf24)':'linear-gradient(90deg,#ef4444,#f97316)';
+  updateGlobalHUD();
+}
+function updateGlobalHUD(){
+  document.getElementById('g-xp').textContent='⚡ '+totalXP+' XP';
+  document.getElementById('g-pts').textContent='▲ '+totalPts+' PTS';
+}
+function addIntel(txt){
+  const f=document.getElementById('intel-feed');
+  if(f.querySelector('.empty-msg'))f.innerHTML='';
+  const d=document.createElement('div');d.className='fi';
+  d.innerHTML=`<span class="fi-icon">✅</span><span class="fi-text">${txt}</span>`;
+  f.appendChild(d);
+}
+function addWrong(txt){
+  const f=document.getElementById('wrong-feed');
+  if(f.querySelector('.empty-msg'))f.innerHTML='';
+  const d=document.createElement('div');d.className='mi';
+  d.innerHTML=`💥 <span style="color:var(--text2)">${txt}</span>`;
+  f.appendChild(d);
+}
+function showPop(rect,txt,type){
+  const p=document.createElement('div');
+  p.className='pop '+type;
+  p.style.cssText=`left:${rect.left+rect.width/2-16}px;top:${rect.top-8}px`;
+  p.textContent=txt;
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),1150);
+}
+function shake(){
+  const el=document.getElementById('app');
+  el.classList.add('shaking');
+  setTimeout(()=>el.classList.remove('shaking'),340);
+}
+
+// init
+selectLevel('easy');
+</script>
+</body>
+</html>

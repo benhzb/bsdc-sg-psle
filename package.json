@@ -1,0 +1,12 @@
+{
+  "name": "sg-psle",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev ./public --d1 DB=dwolf-psle",
+    "deploy": "wrangler pages deploy ./public"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}

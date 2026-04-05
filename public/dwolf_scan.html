@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-WOLF · SCAN OP · Exam Analyser</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090a;--bg2:#0c0f0e;--panel:#101412;--panel2:#161c19;
+  --accent:#7cb518;--accent2:#9cd62a;--al:rgba(124,181,24,.12);
+  --red:#e74c3c;--rl:rgba(231,76,60,.12);
+  --amber:#f59e0b;--aml:rgba(245,158,11,.12);
+  --blue:#38bdf8;--bl:rgba(56,189,248,.12);
+  --purple:#a78bfa;--pl:rgba(167,139,250,.12);
+  --teal:#2dd4bf;--tl:rgba(45,212,191,.12);
+  --text:#c8d8a8;--text2:#7a8a6a;--text3:#3a4a3a;
+  --bdr:rgba(124,181,24,.15);--bdr2:rgba(124,181,24,.32);
+  --ff:"Segoe UI",system-ui,Arial,sans-serif;
+  --ffm:"Courier New","Lucida Console",monospace;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--ff);display:flex;justify-content:center;padding:10px}
+#app{width:100%;max-width:860px}
+
+/* ── HEADER ── */
+.hdr{padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bdr);margin-bottom:0;background:var(--panel)}
+.logo{font-size:1rem;font-weight:900;color:#fff;letter-spacing:3px;flex-shrink:0}
+.logo b{color:var(--accent)}
+.hdr-div{width:1px;height:14px;background:var(--bdr2)}
+.hdr-title{font-size:.82rem;font-weight:700;color:#fff;flex:1}
+.hdr-tag{font-size:.62rem;font-weight:800;font-family:var(--ffm);letter-spacing:1px;padding:3px 9px;border:1px solid var(--bdr2);color:var(--accent);background:var(--al)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:bk .7s infinite;display:inline-block;margin-right:4px}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* ── SCAN SCREENS ── */
+.scr{display:none}.scr.on{display:block}
+
+/* ── S0: INTRO ── */
+.intro{padding:28px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
+.scan-icon{font-size:4.5rem;filter:drop-shadow(0 0 22px rgba(124,181,24,.4));animation:bob 3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.intro-eye{font-size:.62rem;font-weight:700;letter-spacing:2.5px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase}
+.intro-title{font-size:1.8rem;font-weight:900;color:#fff;line-height:1.15}
+.intro-title span{color:var(--accent)}
+.intro-sub{font-size:.83rem;color:var(--text2);line-height:1.75;max-width:480px}
+.intro-sub strong{color:var(--text)}
+
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:520px;width:100%}
+@media(max-width:500px){.feature-grid{grid-template-columns:1fr 1fr}}
+.feat{background:var(--panel);border:1px solid var(--bdr);padding:12px 10px;text-align:center;border-radius:2px;border-top:3px solid}
+.feat:nth-child(1){border-top-color:var(--accent)}
+.feat:nth-child(2){border-top-color:var(--amber)}
+.feat:nth-child(3){border-top-color:var(--blue)}
+.feat-icon{font-size:1.5rem;display:block;margin-bottom:6px}
+.feat-name{font-size:.78rem;font-weight:800;color:#fff;margin-bottom:3px}
+.feat-desc{font-size:.65rem;color:var(--text2);line-height:1.4}
+
+.start-scan-btn{padding:14px 40px;font-size:.92rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:var(--accent);color:#000;border-radius:2px;transition:all .15s}
+.start-scan-btn:hover{background:var(--accent2);transform:scale(1.02)}
+.intro-note{font-size:.62rem;color:var(--text3);font-family:var(--ffm);max-width:380px;line-height:1.6;text-align:center}
+
+/* ── S1: UPLOAD ── */
+.upload-wrap{padding:20px}
+.step-hdr{background:var(--panel);border:1px solid var(--bdr2);border-left:4px solid var(--accent);padding:12px 16px;margin-bottom:14px}
+.sh-eye{font-size:.58rem;font-weight:800;letter-spacing:2px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase;margin-bottom:3px}
+.sh-txt{font-size:.82rem;color:var(--text);line-height:1.55}
+.sh-txt strong{color:#fff}
+
+.upload-zone{border:2px dashed var(--bdr2);background:var(--panel);border-radius:3px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-bottom:14px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--al)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-icon{font-size:3rem;display:block;margin-bottom:10px;opacity:.7}
+.uz-title{font-size:.92rem;font-weight:800;color:#fff;margin-bottom:4px}
+.uz-sub{font-size:.72rem;color:var(--text2);margin-bottom:8px}
+.uz-formats{font-size:.6rem;font-family:var(--ffm);color:var(--text3)}
+
+.or-divider{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.or-line{flex:1;height:1px;background:var(--bdr)}
+.or-txt{font-size:.65rem;color:var(--text3);font-family:var(--ffm);font-weight:700}
+
+.cam-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:12px;background:var(--panel2);border:1px solid var(--bdr2);color:var(--text);cursor:pointer;font-size:.82rem;font-weight:700;font-family:var(--ff);border-radius:2px;transition:all .2s;margin-bottom:14px}
+.cam-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--al)}
+.cam-btn-icon{font-size:1.3rem}
+
+/* CAMERA FEED */
+.cam-wrap{display:none;margin-bottom:14px}
+.cam-wrap.on{display:block}
+.cam-feed{width:100%;border-radius:2px;border:1px solid var(--bdr2);background:#000;max-height:320px;object-fit:cover}
+.cam-controls{display:flex;gap:8px;margin-top:8px}
+.cam-shoot{flex:1;padding:10px;background:var(--accent);color:#000;font-weight:900;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;border-radius:2px;transition:all .15s}
+.cam-shoot:hover{background:var(--accent2)}
+.cam-cancel{padding:10px 16px;background:transparent;border:1px solid var(--bdr2);color:var(--text2);font-size:.78rem;cursor:pointer;border-radius:2px;font-family:var(--ff)}
+
+/* PREVIEW */
+.preview-wrap{display:none;margin-bottom:14px}
+.preview-wrap.on{display:block}
+.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:460px){.preview-grid{grid-template-columns:1fr}}
+.preview-slot{background:var(--panel);border:1px solid var(--bdr2);border-radius:2px;overflow:hidden;position:relative}
+.preview-slot.empty{border:2px dashed var(--bdr);display:flex;align-items:center;justify-content:center;min-height:120px;flex-direction:column;gap:6px;cursor:pointer;transition:all .2s}
+.preview-slot.empty:hover{border-color:var(--bdr2);background:var(--panel2)}
+.ps-icon{font-size:1.8rem;opacity:.5}
+.ps-lbl{font-size:.65rem;color:var(--text2);font-family:var(--ffm)}
+.preview-slot img{width:100%;display:block;max-height:200px;object-fit:contain}
+.preview-slot.has-img{cursor:pointer}
+.ps-remove{position:absolute;top:5px;right:5px;background:var(--red);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900}
+
+.slot-label{font-size:.58rem;font-weight:700;letter-spacing:1.5px;font-family:var(--ffm);text-transform:uppercase;padding:5px 10px;background:var(--panel2);border-bottom:1px solid var(--bdr);color:var(--text2)}
+.slot-label span{color:var(--accent)}
+
+.analyse-btn{width:100%;padding:13px;background:var(--accent);color:#000;font-weight:900;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;border-radius:2px;transition:all .15s;display:none}
+.analyse-btn.on{display:block}
+.analyse-btn:hover{background:var(--accent2)}
+.analyse-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.scan-tip{background:var(--panel);border:1px solid var(--bdr);border-left:3px solid var(--amber);padding:10px 14px;font-size:.73rem;color:var(--text2);line-height:1.6;border-radius:0 2px 2px 0}
+.scan-tip strong{color:var(--amber)}
+
+/* ── S2: PROCESSING ── */
+.processing{padding:48px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+.proc-ring{width:80px;height:80px;border:4px solid var(--bdr2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-title{font-size:1.3rem;font-weight:900;color:#fff}
+.proc-sub{font-size:.8rem;color:var(--text2);font-family:var(--ffm)}
+.proc-steps{display:flex;flex-direction:column;gap:6px;max-width:340px;width:100%;text-align:left}
+.proc-step{display:flex;align-items:center;gap:10px;font-size:.76rem;color:var(--text3);padding:5px 0;transition:all .3s}
+.proc-step.done{color:var(--accent)}
+.proc-step.act{color:var(--text)}
+.ps-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:all .3s}
+.proc-step.done .ps-dot{background:var(--accent)}
+.proc-step.act .ps-dot{background:var(--amber);animation:bk .6s infinite}
+
+/* ── S3: RESULTS ── */
+.results-wrap{padding:16px}
+
+/* TOP SCORECARD */
+.scorecard{background:var(--panel);border:1px solid var(--bdr2);padding:16px 18px;margin-bottom:14px;border-radius:2px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.sc-grade{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;font-family:var(--ffm);flex-shrink:0;border:3px solid}
+.grade-a{background:rgba(124,181,24,.15);border-color:var(--accent);color:var(--accent)}
+.grade-b{background:rgba(245,158,11,.15);border-color:var(--amber);color:var(--amber)}
+.grade-c{background:rgba(56,189,248,.15);border-color:var(--blue);color:var(--blue)}
+.grade-d{background:rgba(231,76,60,.15);border-color:var(--red);color:var(--red)}
+.sc-info{flex:1}
+.sc-title{font-size:1rem;font-weight:900;color:#fff;margin-bottom:2px}
+.sc-sub{font-size:.74rem;color:var(--text2);line-height:1.5}
+.sc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.sc-tag{font-size:.58rem;font-weight:700;font-family:var(--ffm);padding:2px 8px;border-radius:2px}
+.tag-ok{background:var(--al);color:var(--accent);border:1px solid rgba(124,181,24,.3)}
+.tag-warn{background:var(--aml);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.tag-err{background:var(--rl);color:var(--red);border:1px solid rgba(231,76,60,.3)}
+.sc-stats{display:flex;gap:8px;flex-wrap:wrap}
+.sc-stat{background:var(--bg);border:1px solid var(--bdr);padding:8px 12px;text-align:center;border-radius:2px;min-width:70px}
+.ss-v{font-size:1.1rem;font-weight:900;font-family:var(--ffm);display:block}
+.ss-l{font-size:.56rem;color:var(--text2);font-family:var(--ffm);letter-spacing:.5px;text-transform:uppercase}
+
+/* SECTION PANELS */
+.section{background:var(--panel);border:1px solid var(--bdr);border-radius:2px;margin-bottom:10px;overflow:hidden}
+.sec-hdr{padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;-webkit-user-select:none;border-bottom:1px solid var(--bdr)}
+.sec-hdr:hover{background:var(--panel2)}
+.sec-icon{font-size:1.1rem;flex-shrink:0}
+.sec-title{font-size:.82rem;font-weight:800;color:#fff;flex:1}
+.sec-badge{font-size:.58rem;font-weight:800;font-family:var(--ffm);padding:2px 8px;border-radius:2px}
+.sec-chevron{font-size:.7rem;color:var(--text2);transition:transform .3s;flex-shrink:0}
+.section.open .sec-chevron{transform:rotate(90deg)}
+.sec-body{padding:14px;display:none}
+.section.open .sec-body{display:block}
+
+/* QUESTION PANEL */
+.q-box{background:linear-gradient(160deg,#f5f0e5,#eae5d5);border:1px solid #c5b898;border-radius:2px;padding:14px 16px;font-family:serif;font-size:.88rem;color:#1a1a1a;line-height:1.85}
+.q-box .qnum{display:inline-block;border:1.5px solid #c0392b;border-radius:50%;padding:0 4px;font-weight:700;color:#c0392b;margin-right:4px;font-size:.82rem}
+
+/* WORKING PANEL */
+.working-transcript{background:var(--bg2);border:1px solid var(--bdr);border-radius:2px;padding:12px 14px;font-family:var(--ffm);font-size:.8rem;color:var(--text);line-height:1.8;white-space:pre-wrap;margin-bottom:10px}
+
+/* ERRORS PANEL */
+.error-list{display:flex;flex-direction:column;gap:8px}
+.error-item{background:var(--bg);border:1px solid rgba(231,76,60,.25);border-left:4px solid var(--red);padding:11px 13px;border-radius:0 2px 2px 0}
+.ei-num{font-size:.58rem;font-weight:800;font-family:var(--ffm);color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.ei-title{font-size:.82rem;font-weight:800;color:#fff;margin-bottom:4px}
+.ei-desc{font-size:.76rem;color:var(--text2);line-height:1.55}
+.ei-student{font-size:.73rem;color:var(--red);font-family:var(--ffm);margin-top:5px;padding:4px 8px;background:var(--rl);border-radius:2px}
+.ei-correct{font-size:.73rem;color:var(--accent);font-family:var(--ffm);margin-top:4px;padding:4px 8px;background:var(--al);border-radius:2px}
+.no-errors{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--al);border:1px solid rgba(124,181,24,.3);border-radius:2px;font-size:.82rem;color:var(--accent);font-weight:700}
+
+/* CORRECT METHOD PANEL */
+.method-steps{display:flex;flex-direction:column;gap:7px}
+.mstep{background:var(--bg);border:1px solid var(--bdr);padding:11px 13px;border-left:4px solid var(--accent);border-radius:0 2px 2px 0}
+.ms-num{font-size:.6rem;font-weight:800;font-family:var(--ffm);color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.ms-txt{font-size:.82rem;color:var(--text);line-height:1.6}
+.ms-formula{font-family:var(--ffm);font-size:.85rem;font-weight:800;color:#fff;background:var(--panel2);border:1px solid var(--bdr2);padding:6px 11px;margin-top:6px;display:inline-block;border-radius:2px}
+.bm-container{background:rgba(0,0,0,.4);border:1px solid var(--bdr2);border-radius:2px;padding:11px;margin-top:8px}
+.bm-label{font-size:.58rem;font-weight:800;letter-spacing:1.5px;color:var(--blue);font-family:var(--ffm);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.bm-label::before{content:"";width:3px;height:10px;background:var(--blue);display:inline-block}
+
+/* ENCOURAGEMENT PANEL */
+.enc-box{background:linear-gradient(135deg,rgba(124,181,24,.08),rgba(45,212,191,.05));border:1px solid var(--bdr2);border-radius:2px;padding:16px;text-align:center}
+.enc-wolf{font-size:2.5rem;display:block;margin-bottom:8px;animation:bob 3s ease-in-out infinite}
+.enc-msg{font-size:.86rem;color:var(--text);line-height:1.7;margin-bottom:10px}
+.enc-msg strong{color:var(--accent)}
+.enc-xp{display:inline-flex;align-items:center;gap:6px;background:var(--al);border:1px solid rgba(124,181,24,.3);padding:6px 14px;border-radius:2px;font-size:.78rem;font-weight:800;color:var(--accent);font-family:var(--ffm)}
+
+/* ACTION BUTTONS */
+.action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.act-main{flex:1;min-width:140px;padding:12px;background:var(--accent);color:#000;font-weight:900;font-size:.82rem;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border:none;border-radius:2px;transition:all .15s}
+.act-main:hover{background:var(--accent2)}
+.act-sec{padding:12px 16px;background:transparent;border:1px solid var(--bdr2);color:var(--text2);font-size:.78rem;font-weight:700;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;font-family:var(--ff)}
+.act-sec:hover{color:var(--text);border-color:var(--bdr2)}
+
+/* ERROR STATE */
+.error-banner{background:var(--rl);border:1px solid rgba(231,76,60,.4);border-radius:2px;padding:14px 16px;margin-top:12px;display:none}
+.error-banner.on{display:block}
+.eb-title{font-size:.8rem;font-weight:800;color:var(--red);margin-bottom:4px}
+.eb-msg{font-size:.74rem;color:var(--text2);line-height:1.5}
+
+.pop-float{position:fixed;font-family:var(--ffm);font-size:.85rem;font-weight:900;pointer-events:none;animation:pf 1.1s ease-out forwards;z-index:999}
+@keyframes pf{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-46px)}}
+
+canvas{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo"><b>D</b>-WOLF</div>
+  <div class="hdr-div"></div>
+  <div class="hdr-title">SCAN OP &middot; Exam Analyser</div>
+  <div class="hdr-tag"><span class="live-dot"></span>AI POWERED</div>
+</div>
+
+<!-- S0: INTRO -->
+<div class="scr on" id="s0">
+  <div class="intro">
+    <div class="scan-icon">&#x1F4F7;</div>
+    <div class="intro-eye">// SCAN OP // EXAM ANALYSER //</div>
+    <h1 class="intro-title">Scan Your <span>Exam Paper</span></h1>
+    <p class="intro-sub">
+      Take a photo of your exam question and your <strong>handwritten working</strong>.<br>
+      The AI will read everything, find your mistakes, and show you the <strong>correct Singapore bar model method</strong>.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feat">
+        <span class="feat-icon">&#x1F4DD;</span>
+        <div class="feat-name">OCR Reading</div>
+        <div class="feat-desc">Reads the question and your handwriting automatically</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">&#x1F50D;</span>
+        <div class="feat-name">Error Finder</div>
+        <div class="feat-desc">Spots exactly where your method or calculation went wrong</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">&#x1F4CA;</span>
+        <div class="feat-name">Bar Model Fix</div>
+        <div class="feat-desc">Shows the correct Singapore method step by step</div>
+      </div>
+    </div>
+
+    <button class="start-scan-btn" onclick="goScr('s1')">START SCAN OP</button>
+    <p class="intro-note">You can upload 1 photo if both question and working are in the same image, or 2 separate photos. Works best with clear, well-lit photos.</p>
+  </div>
+</div>
+
+<!-- S1: UPLOAD -->
+<div class="scr" id="s1">
+  <div class="upload-wrap">
+    <div class="step-hdr">
+      <div class="sh-eye">// STEP 1 &middot; UPLOAD PHOTOS //</div>
+      <div class="sh-txt">Upload a photo of the <strong>exam question</strong> and your <strong>handwritten working</strong>. One photo is fine if both are visible together.</div>
+    </div>
+
+    <!-- DRAG DROP ZONE (single photo mode) -->
+    <div class="upload-zone" id="drop-zone" ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)">
+      <input type="file" id="file-in" accept="image/*" multiple onchange="onFileSelect(event)">
+      <span class="uz-icon">&#x1F4F8;</span>
+      <div class="uz-title">Drop photos here or tap to browse</div>
+      <div class="uz-sub">Select 1 or 2 photos from your device</div>
+      <div class="uz-formats">JPG &middot; PNG &middot; HEIC &middot; WEBP &middot; up to 20MB each</div>
+    </div>
+
+    <div class="or-divider"><div class="or-line"></div><span class="or-txt">OR USE CAMERA</span><div class="or-line"></div></div>
+
+    <button class="cam-btn" onclick="startCam()">
+      <span class="cam-btn-icon">&#x1F4F7;</span>
+      Take Photo with Camera
+    </button>
+
+    <!-- CAMERA FEED -->
+    <div class="cam-wrap" id="cam-wrap">
+      <video class="cam-feed" id="cam-feed" autoplay playsinline></video>
+      <div class="cam-controls">
+        <button class="cam-shoot" onclick="shootPhoto()">TAKE PHOTO</button>
+        <button class="cam-cancel" onclick="stopCam()">Cancel</button>
+      </div>
+    </div>
+    <canvas id="cam-canvas"></canvas>
+
+    <!-- PREVIEW SLOTS -->
+    <div class="preview-wrap" id="preview-wrap">
+      <div class="preview-grid" id="preview-grid"></div>
+    </div>
+
+    <div class="scan-tip" style="margin-bottom:12px">
+      <strong>Tip for best results:</strong> Make sure the question text and ALL of your working steps are clearly visible. Lay the paper flat, use good lighting, avoid shadows.
+    </div>
+
+    <div class="error-banner" id="err-banner">
+      <div class="eb-title">Analysis Failed</div>
+      <div class="eb-msg" id="err-msg">Something went wrong. Please try again with a clearer photo.</div>
+    </div>
+
+    <button class="analyse-btn" id="analyse-btn" onclick="runAnalysis()">ANALYSE MY WORKING</button>
+  </div>
+</div>
+
+<!-- S2: PROCESSING -->
+<div class="scr" id="s2">
+  <div class="processing">
+    <div class="proc-ring"></div>
+    <div class="proc-title">Analysing your work...</div>
+    <div class="proc-sub" id="proc-sub">Sending to AI engine</div>
+    <div class="proc-steps">
+      <div class="proc-step" id="ps1"><div class="ps-dot"></div>Reading exam question</div>
+      <div class="proc-step" id="ps2"><div class="ps-dot"></div>Transcribing handwritten working</div>
+      <div class="proc-step" id="ps3"><div class="ps-dot"></div>Checking method and calculations</div>
+      <div class="proc-step" id="ps4"><div class="ps-dot"></div>Building bar model solution</div>
+      <div class="proc-step" id="ps5"><div class="ps-dot"></div>Preparing your personalised report</div>
+    </div>
+  </div>
+</div>
+
+<!-- S3: RESULTS -->
+<div class="scr" id="s3">
+  <div class="results-wrap" id="results-wrap">
+    <!-- filled dynamically -->
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+/* ── STATE ── */
+var images = [];      // array of base64 strings (without data: prefix)
+var imageTypes = [];  // mime types
+var stream = null;
+var analysisResult = null;
+
+/* ── NAVIGATION ── */
+function goScr(id) {
+  var all = document.querySelectorAll('.scr');
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('on');
+  var el = document.getElementById(id);
+  if (el) el.classList.add('on');
+  if (window.scrollTo) window.scrollTo(0, 0);
+}
+
+/* ── DRAG & DROP ── */
+function onDrag(e, over) {
+  e.preventDefault();
+  var dz = document.getElementById('drop-zone');
+  if (dz) dz.classList.toggle('drag', over);
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  var dz = document.getElementById('drop-zone');
+  if (dz) dz.classList.remove('drag');
+  var files = e.dataTransfer ? e.dataTransfer.files : [];
+  handleFiles(files);
+}
+
+function onFileSelect(e) {
+  handleFiles(e.target.files);
+}
+
+function handleFiles(files) {
+  if (!files || files.length === 0) return;
+  var toProcess = Math.min(files.length, 2 - images.length);
+  var processed = 0;
+  for (var i = 0; i < toProcess; i++) {
+    (function(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var dataUrl = e.target.result;
+        var b64 = dataUrl.split(',')[1];
+        var mime = file.type || 'image/jpeg';
+        images.push(b64);
+        imageTypes.push(mime);
+        processed++;
+        if (processed === toProcess) renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+}
+
+/* ── CAMERA ── */
+function startCam() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('Camera not available on this device. Please use the file upload instead.');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(function(s) {
+      stream = s;
+      var vid = document.getElementById('cam-feed');
+      if (vid) { vid.srcObject = s; }
+      var cw = document.getElementById('cam-wrap');
+      if (cw) cw.classList.add('on');
+    })
+    .catch(function() {
+      alert('Could not access camera. Please allow camera permission or use file upload.');
+    });
+}
+
+function stopCam() {
+  if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); stream = null; }
+  var cw = document.getElementById('cam-wrap');
+  if (cw) cw.classList.remove('on');
+}
+
+function shootPhoto() {
+  var vid = document.getElementById('cam-feed');
+  var canvas = document.getElementById('cam-canvas');
+  if (!vid || !canvas) return;
+  canvas.width = vid.videoWidth;
+  canvas.height = vid.videoHeight;
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(vid, 0, 0);
+  var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  var b64 = dataUrl.split(',')[1];
+  images.push(b64);
+  imageTypes.push('image/jpeg');
+  stopCam();
+  renderPreviews();
+}
+
+/* ── PREVIEWS ── */
+function renderPreviews() {
+  var wrap = document.getElementById('preview-wrap');
+  var grid = document.getElementById('preview-grid');
+  var btn = document.getElementById('analyse-btn');
+  if (!wrap || !grid) return;
+  wrap.classList.add('on');
+  grid.innerHTML = '';
+
+  var labels = ['Photo 1 &mdash; Question &amp; Working', 'Photo 2 &mdash; Additional Working'];
+  for (var i = 0; i < 2; i++) {
+    var slot = document.createElement('div');
+    if (i < images.length) {
+      slot.className = 'preview-slot has-img';
+      slot.innerHTML = '<div class="slot-label">&#x1F5BC; <span>' + labels[i] + '</span></div>'
+        + '<img src="data:' + imageTypes[i] + ';base64,' + images[i] + '" alt="Preview ' + (i+1) + '">'
+        + '<button class="ps-remove" onclick="removeImg(' + i + ')" title="Remove">&#x2715;</button>';
+    } else if (i < 1 || images.length >= 1) {
+      slot.className = 'preview-slot empty';
+      slot.innerHTML = '<span class="ps-icon">&#x2795;</span><span class="ps-lbl">Add 2nd photo (optional)</span>';
+      slot.onclick = function() { document.getElementById('file-in').click(); };
+    }
+    grid.appendChild(slot);
+  }
+
+  // Hide the second empty slot if we already have 2 images
+  if (images.length >= 2) {
+    var slots = grid.querySelectorAll('.preview-slot.empty');
+    for (var j = 0; j < slots.length; j++) slots[j].style.display = 'none';
+  }
+
+  if (btn) btn.className = images.length > 0 ? 'analyse-btn on' : 'analyse-btn';
+}
+
+function removeImg(idx) {
+  images.splice(idx, 1);
+  imageTypes.splice(idx, 1);
+  if (images.length === 0) {
+    var wrap = document.getElementById('preview-wrap');
+    if (wrap) wrap.classList.remove('on');
+    var btn = document.getElementById('analyse-btn');
+    if (btn) btn.className = 'analyse-btn';
+  } else {
+    renderPreviews();
+  }
+}
+
+/* ── ANALYSIS ── */
+function runAnalysis() {
+  if (images.length === 0) return;
+  var errBanner = document.getElementById('err-banner');
+  if (errBanner) errBanner.classList.remove('on');
+  goScr('s2');
+  animateSteps();
+  callClaudeAPI();
+}
+
+function animateSteps() {
+  var steps = ['ps1','ps2','ps3','ps4','ps5'];
+  var delays = [0, 1200, 2400, 3600, 4800];
+  steps.forEach(function(id, i) {
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var prev = document.getElementById(steps[i-1]);
+      if (prev) { prev.classList.remove('act'); prev.classList.add('done'); }
+      el.classList.add('act');
+    }, delays[i]);
+  });
+}
+
+function callClaudeAPI() {
+  // Build message content with all images
+  var content = [];
+  for (var i = 0; i < images.length; i++) {
+    content.push({
+      type: 'image',
+      source: { type: 'base64', media_type: imageTypes[i], data: images[i] }
+    });
+  }
+  content.push({
+    type: 'text',
+    text: 'You are an expert Singapore primary school mathematics tutor specialising in PSLE preparation.\n\nA student has submitted photo(s) of their exam question with their handwritten working.\n\nAnalyse everything and respond with ONLY valid JSON (no markdown, no backticks, no preamble) in this exact structure:\n\n{\n  "question_text": "The full exam question text as written on the paper",\n  "parts": ["(a) question part a text", "(b) question part b text"],\n  "student_working": "Verbatim transcription of ALL the student handwritten working, step by step",\n  "correct_answers": {"a": "answer", "b": "answer", "c": "answer"},\n  "student_answers": {"a": "what student wrote", "b": "what student wrote"},\n  "score_estimate": 75,\n  "grade": "B",\n  "errors": [\n    {\n      "part": "(a)",\n      "error_title": "Short title of the mistake",\n      "error_description": "Clear explanation of what went wrong and why it is wrong",\n      "student_wrote": "Exact notation/calculation student used",\n      "should_be": "What the correct step should be"\n    }\n  ],\n  "correct_method": [\n    {\n      "step_number": 1,\n      "step_title": "Short action title",\n      "step_explanation": "Clear Singapore primary school explanation using bar model / unit method ONLY. No algebra. No cross-multiplication.",\n      "calculation": "The actual calculation e.g. 3 x $15 = $45",\n      "bar_model_description": "Describe the bar model to draw for this step e.g. Draw a bar split into 7 equal units: 4 units shaded for Ben spent, 3 units for Ben kept"\n    }\n  ],\n  "key_concepts": ["concept 1", "concept 2", "concept 3"],\n  "encouragement": "A warm, specific, encouraging message for the student (2-3 sentences). Mention what they did well first.",\n  "xp_earned": 45\n}\n\nCRITICAL RULES:\n- Use ONLY Singapore primary school methods (bar model, unit method)\n- NO algebra, NO cross-multiplication, NO variables like x or y\n- If working is correct, errors array should be empty []\n- Be specific about mistakes - quote exactly what the student wrote\n- The encouragement must always start positive even if many errors exist\n- score_estimate is 0-100 based on marks likely awarded in an exam\n- grade: A (85+), B (70-84), C (55-69), D (below 55)\n- xp_earned: 30-100 based on attempt quality (give credit for trying)'
+  });
+
+  var token = localStorage.getItem('dwolf_token') || '';
+  var hdrs = { 'Content-Type': 'application/json' };
+  if (token) hdrs['Authorization'] = 'Bearer ' + token;
+
+  fetch('/api/scan', {
+    method: 'POST',
+    headers: hdrs,
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: content }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) throw new Error(data.error.message || 'API error');
+    var text = '';
+    if (data.content && data.content.length > 0) {
+      for (var i = 0; i < data.content.length; i++) {
+        if (data.content[i].type === 'text') text += data.content[i].text;
+      }
+    }
+    // Strip any markdown fences if present
+    text = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    var result = JSON.parse(text);
+    analysisResult = result;
+    setTimeout(function() { renderResults(result); }, 1000);
+  })
+  .catch(function(err) {
+    console.error('Analysis error:', err);
+    goScr('s1');
+    var eb = document.getElementById('err-banner');
+    var em = document.getElementById('err-msg');
+    if (eb) eb.classList.add('on');
+    if (em) em.textContent = 'Analysis failed: ' + (err.message || 'Unknown error') + '. Please check your photo and try again.';
+  });
+}
+
+/* ── RENDER RESULTS ── */
+function renderResults(r) {
+  goScr('s3');
+  var wrap = document.getElementById('results-wrap');
+  if (!wrap) return;
+
+  var gradeClass = r.grade === 'A' ? 'grade-a' : r.grade === 'B' ? 'grade-b' : r.grade === 'C' ? 'grade-c' : 'grade-d';
+  var errCount = r.errors ? r.errors.length : 0;
+  var conceptCount = r.key_concepts ? r.key_concepts.length : 0;
+
+  // TAG BADGES
+  var tags = '';
+  if (errCount === 0) tags += '<span class="sc-tag tag-ok">NO ERRORS FOUND</span>';
+  else if (errCount <= 2) tags += '<span class="sc-tag tag-warn">' + errCount + ' ERROR' + (errCount > 1 ? 'S' : '') + ' FOUND</span>';
+  else tags += '<span class="sc-tag tag-err">' + errCount + ' ERRORS FOUND</span>';
+  if (r.score_estimate >= 70) tags += '<span class="sc-tag tag-ok">PASSING</span>';
+  else tags += '<span class="sc-tag tag-err">NEEDS WORK</span>';
+  tags += '<span class="sc-tag" style="background:var(--bl);color:var(--blue);border:1px solid rgba(56,189,248,.3)">' + conceptCount + ' CONCEPTS</span>';
+
+  // ERRORS HTML
+  var errHtml = '';
+  if (!r.errors || r.errors.length === 0) {
+    errHtml = '<div class="no-errors"><span style="font-size:1.3rem">&#x2705;</span><span>No errors found! Your method and working are correct.</span></div>';
+  } else {
+    errHtml = '<div class="error-list">';
+    for (var i = 0; i < r.errors.length; i++) {
+      var e = r.errors[i];
+      errHtml += '<div class="error-item">'
+        + '<div class="ei-num">ERROR ' + (i+1) + (e.part ? ' &mdash; PART ' + e.part : '') + '</div>'
+        + '<div class="ei-title">' + (e.error_title || '') + '</div>'
+        + '<div class="ei-desc">' + (e.error_description || '') + '</div>'
+        + (e.student_wrote ? '<div class="ei-student">Student wrote: ' + e.student_wrote + '</div>' : '')
+        + (e.should_be ? '<div class="ei-correct">Should be: ' + e.should_be + '</div>' : '')
+        + '</div>';
+    }
+    errHtml += '</div>';
+  }
+
+  // CORRECT METHOD HTML
+  var methodHtml = '<div class="method-steps">';
+  if (r.correct_method && r.correct_method.length > 0) {
+    for (var i = 0; i < r.correct_method.length; i++) {
+      var s = r.correct_method[i];
+      methodHtml += '<div class="mstep">'
+        + '<div class="ms-num">STEP ' + s.step_number + ' &mdash; ' + (s.step_title || '') + '</div>'
+        + '<div class="ms-txt">' + (s.step_explanation || '') + '</div>'
+        + (s.calculation ? '<div class="ms-formula">' + s.calculation + '</div>' : '')
+        + (s.bar_model_description ? '<div class="bm-container"><div class="bm-label">BAR MODEL</div><div style="font-size:.76rem;color:var(--text2);line-height:1.6">' + s.bar_model_description + '</div></div>' : '')
+        + '</div>';
+    }
+  }
+  methodHtml += '</div>';
+
+  // KEY CONCEPTS HTML
+  var conceptsHtml = '';
+  if (r.key_concepts && r.key_concepts.length > 0) {
+    conceptsHtml = '<div style="display:flex;flex-direction:column;gap:5px">';
+    for (var i = 0; i < r.key_concepts.length; i++) {
+      conceptsHtml += '<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:.78rem;color:var(--text)">'
+        + '<span style="color:var(--accent);font-family:var(--ffm);font-size:.65rem;font-weight:800;flex-shrink:0;margin-top:2px">' + (i+1) + '</span>'
+        + '<span>' + r.key_concepts[i] + '</span></div>';
+    }
+    conceptsHtml += '</div>';
+  }
+
+  // CORRECT ANSWERS HTML
+  var answersHtml = '<div style="display:flex;flex-direction:column;gap:4px">';
+  if (r.correct_answers) {
+    for (var key in r.correct_answers) {
+      var studentAns = r.student_answers && r.student_answers[key] ? r.student_answers[key] : '--';
+      var correctAns = r.correct_answers[key];
+      var isRight = studentAns && correctAns && studentAns.toString().trim().toLowerCase() === correctAns.toString().trim().toLowerCase();
+      answersHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:.8rem">'
+        + '<span style="color:var(--text2)">Part (' + key + ')</span>'
+        + '<span style="display:flex;gap:10px;align-items:center">'
+        + '<span style="font-family:var(--ffm);font-size:.72rem;color:var(--text3)">Student: ' + studentAns + '</span>'
+        + '<span style="font-family:var(--ffm);font-weight:800;' + (isRight ? 'color:var(--accent)' : 'color:var(--red)') + '">' + correctAns + '</span>'
+        + '<span>' + (isRight ? '&#x2705;' : '&#x274C;') + '</span>'
+        + '</span></div>';
+    }
+  }
+  answersHtml += '</div>';
+
+  wrap.innerHTML = ''
+    // SCORECARD
+    + '<div class="scorecard">'
+    + '<div class="sc-grade ' + gradeClass + '">' + (r.grade || 'B') + '</div>'
+    + '<div class="sc-info">'
+    + '<div class="sc-title">Analysis Complete</div>'
+    + '<div class="sc-sub">' + (r.question_text ? r.question_text.substring(0,80) + '...' : 'Exam question analysed') + '</div>'
+    + '<div class="sc-tags">' + tags + '</div>'
+    + '</div>'
+    + '<div class="sc-stats">'
+    + '<div class="sc-stat"><span class="ss-v" style="color:var(--accent)">' + (r.score_estimate || 0) + '%</span><span class="ss-l">SCORE</span></div>'
+    + '<div class="sc-stat"><span class="ss-v" style="color:var(--red)">' + errCount + '</span><span class="ss-l">ERRORS</span></div>'
+    + '<div class="sc-stat"><span class="ss-v" style="color:var(--purple)">+' + (r.xp_earned || 30) + '</span><span class="ss-l">XP</span></div>'
+    + '</div></div>'
+
+    // ANSWERS SUMMARY
+    + buildSection('&#x2714;&#xFE0F;', 'Answers', answersHtml, true, 'tag-ok', 'SUMMARY')
+
+    // STUDENT WORKING
+    + buildSection('&#x270D;&#xFE0F;', 'Your Working (as read)', '<div class="working-transcript">' + (r.student_working || 'No working detected') + '</div>', false, '', '')
+
+    // ERRORS
+    + buildSection('&#x26A0;&#xFE0F;', 'Errors Found', errHtml, true,
+        errCount === 0 ? 'tag-ok' : errCount <= 2 ? 'tag-warn' : 'tag-err',
+        errCount + (errCount === 1 ? ' ERROR' : ' ERRORS'))
+
+    // CORRECT METHOD
+    + buildSection('&#x1F4CA;', 'Correct Singapore Method', methodHtml, true, 'tag-ok', 'BAR MODEL')
+
+    // KEY CONCEPTS
+    + buildSection('&#x1F4A1;', 'Key Concepts to Remember', conceptsHtml, false, '', '')
+
+    // ENCOURAGEMENT
+    + '<div class="enc-box">'
+    + '<span class="enc-wolf">&#x1F43A;</span>'
+    + '<div class="enc-msg">' + (r.encouragement || 'Great effort! Keep practising.') + '</div>'
+    + '<div class="enc-xp">+' + (r.xp_earned || 30) + ' XP EARNED &mdash; MISSION LOGGED</div>'
+    + '</div>'
+
+    // ACTIONS
+    + '<div class="action-row">'
+    + '<button class="act-main" onclick="scanAnother()">SCAN ANOTHER PAPER</button>'
+    + '<button class="act-sec" onclick="window.location.href=\'index.html\'">MISSION BOARD</button>'
+    + '</div>';
+
+  // Save XP to localStorage
+  try {
+    var st = JSON.parse(localStorage.getItem('dw_state') || '{}');
+    st.xp = (st.xp || 0) + (r.xp_earned || 30);
+    localStorage.setItem('dw_state', JSON.stringify(st));
+  } catch(err) {}
+}
+
+function buildSection(icon, title, bodyHtml, startOpen, badgeCls, badgeTxt) {
+  var openCls = startOpen ? ' open' : '';
+  var badgeHtml = badgeTxt ? '<span class="sec-badge ' + badgeCls + '">' + badgeTxt + '</span>' : '';
+  return '<div class="section' + openCls + '">'
+    + '<div class="sec-hdr" onclick="toggleSection(this)">'
+    + '<span class="sec-icon">' + icon + '</span>'
+    + '<span class="sec-title">' + title + '</span>'
+    + badgeHtml
+    + '<span class="sec-chevron">&#x276F;</span>'
+    + '</div>'
+    + '<div class="sec-body">' + bodyHtml + '</div>'
+    + '</div>';
+}
+
+function toggleSection(hdr) {
+  var sec = hdr.parentElement;
+  if (sec) sec.classList.toggle('open');
+}
+
+function scanAnother() {
+  images = [];
+  imageTypes = [];
+  analysisResult = null;
+  var grid = document.getElementById('preview-grid');
+  if (grid) grid.innerHTML = '';
+  var pw = document.getElementById('preview-wrap');
+  if (pw) pw.classList.remove('on');
+  var ab = document.getElementById('analyse-btn');
+  if (ab) ab.className = 'analyse-btn';
+  var fi = document.getElementById('file-in');
+  if (fi) fi.value = '';
+  var eb = document.getElementById('err-banner');
+  if (eb) eb.classList.remove('on');
+  goScr('s1');
+}
+</script>
+</body>
+</html>

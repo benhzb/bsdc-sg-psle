@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-WOLF - Mission Locked</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0c08;--panel:#121508;--accent:#7cb518;--accent2:#9cd62a;--text:#d4e4a0;--text2:#8a9a6a;--bdr:rgba(124,181,24,.18);--bdr2:rgba(124,181,24,.35);--amber:#f59e0b;--ff:"Segoe UI",system-ui,Arial,sans-serif;--ffm:"Courier New",monospace;}
+html,body{min-height:100vh;background:#050705;display:flex;justify-content:center;align-items:center;padding:20px;font-family:var(--ff)}
+.card{background:var(--bg);border:1px solid var(--bdr2);max-width:460px;width:100%;padding:38px 30px;text-align:center;position:relative;overflow:hidden;border-radius:3px}
+.card::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(124,181,24,.012) 2px,rgba(124,181,24,.012) 4px);pointer-events:none}
+.wolf{font-size:4rem;animation:bob 3s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(124,181,24,.3));display:block;margin-bottom:14px}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.eyebrow{font-size:.62rem;font-weight:700;letter-spacing:2.5px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase;margin-bottom:10px}
+.title{font-size:1.7rem;font-weight:900;color:#fff;margin-bottom:6px}
+.subtitle{font-size:.92rem;color:var(--accent);font-family:var(--ffm);font-weight:700;margin-bottom:14px}
+.msg{font-size:.82rem;color:var(--text2);line-height:1.7;margin-bottom:22px}
+.msg strong{color:var(--text)}
+.status-box{background:rgba(0,0,0,.4);border:1px solid var(--bdr);padding:14px 16px;margin-bottom:24px;text-align:left;border-radius:2px}
+.sb-title{font-size:.58rem;font-weight:800;letter-spacing:1.5px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase;margin-bottom:10px}
+.sb-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:.78rem}
+.sb-row:last-child{border-bottom:none}
+.sb-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.d-ok{background:var(--accent)}
+.d-act{background:var(--amber);animation:pulse .9s infinite}
+.d-lock{background:rgba(255,255,255,.15)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sb-name{flex:1}
+.n-ok{color:var(--text);font-weight:600}
+.n-act{color:var(--amber);font-weight:700}
+.n-lock{color:var(--text2)}
+.sb-tag{font-family:var(--ffm);font-size:.6rem;font-weight:700}
+.t-ok{color:var(--accent)}.t-act{color:var(--amber)}.t-lock{color:var(--text2)}
+.back-btn{display:inline-block;padding:12px 32px;background:var(--accent);color:#000;font-weight:900;font-size:.86rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;border-radius:2px;transition:all .15s;text-decoration:none}
+.back-btn:hover{background:var(--accent2);transform:scale(1.02)}
+.hint{font-size:.62rem;color:var(--text2);font-family:var(--ffm);margin-top:11px;opacity:.7}
+</style>
+</head>
+<body>
+<div class="card">
+  <span class="wolf">&#x1F43A;</span>
+  <div class="eyebrow">// MISSION LOCKED //</div>
+  <h1 class="title">Coming Soon</h1>
+  <div class="subtitle">Intel Being Classified</div>
+  <p class="msg">
+    This mission is still being prepared by <strong>D-Wolf HQ</strong>.<br>
+    Start with the <strong>ACTIVE</strong> missions below first!
+  </p>
+
+  <div class="status-box">
+    <div class="sb-title">// AVAILABLE MISSIONS NOW</div>
+    <div class="sb-row">
+      <div class="sb-dot d-ok"></div>
+      <div class="sb-name n-ok">MKG-013 &mdash; Glasses Intel Op</div>
+      <div class="sb-tag t-ok">READY</div>
+    </div>
+    <div class="sb-row">
+      <div class="sb-dot d-ok"></div>
+      <div class="sb-name n-ok">MKG-017 &mdash; Bakery Supply Op + Quiz</div>
+      <div class="sb-tag t-ok">READY</div>
+    </div>
+    <div class="sb-row">
+      <div class="sb-dot d-act"></div>
+      <div class="sb-name n-act">MKG-007 &mdash; Coin Vault Heist</div>
+      <div class="sb-tag t-act">ACTIVE</div>
+    </div>
+    <div class="sb-row">
+      <div class="sb-dot d-lock"></div>
+      <div class="sb-name n-lock">MKG-001 to 006 &mdash; Other Missions</div>
+      <div class="sb-tag t-lock">BUILDING</div>
+    </div>
+  </div>
+
+  <a class="back-btn" href="index.html">&#8592; BACK TO MISSION BOARD</a>
+  <div class="hint">New missions added regularly. Check back soon!</div>
+</div>
+</body>
+</html>

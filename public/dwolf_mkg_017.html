@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-WOLF - MKG-017 - Bakery Supply Op</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c08;--panel:#121508;--panel2:#1a1f0a;
+  --accent:#7cb518;--accent2:#9cd62a;--al:rgba(124,181,24,.14);
+  --red:#e74c3c;--rl:rgba(231,76,60,.14);
+  --amber:#f59e0b;--aml:rgba(245,158,11,.14);
+  --blue:#38bdf8;--bl:rgba(56,189,248,.14);
+  --purple:#a78bfa;--pl:rgba(167,139,250,.14);
+  --text:#d4e4a0;--text2:#8a9a6a;--text3:#4a5a3a;
+  --bdr:rgba(124,181,24,.18);--bdr2:rgba(124,181,24,.35);
+  --ff:"Segoe UI",system-ui,Arial,sans-serif;
+  --ffm:"Courier New","Lucida Console",monospace;
+}
+html,body{min-height:100vh;background:#050705;display:flex;justify-content:center;padding:10px;font-family:var(--ff)}
+#app{width:100%;max-width:880px;background:var(--bg);color:var(--text);border:1px solid var(--bdr);border-radius:3px;overflow:hidden;position:relative}
+#app::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(124,181,24,.013) 2px,rgba(124,181,24,.013) 4px);pointer-events:none;z-index:100}
+
+/* HEADER */
+.hdr{background:var(--panel);border-bottom:2px solid var(--bdr2);padding:12px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:60}
+.logo{font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:3px}
+.logo span{color:var(--accent)}
+.hdiv{width:1px;height:16px;background:var(--bdr2)}
+.htitle{font-size:.88rem;font-weight:700;color:#fff;flex:1}
+.phases{display:flex;gap:4px}
+.ph{padding:4px 10px;font-size:.65rem;font-weight:700;font-family:var(--ffm);letter-spacing:.5px;color:var(--text3);border:1px solid var(--bdr);display:flex;align-items:center;gap:4px;transition:all .3s}
+.ph-n{width:14px;height:14px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.48rem;flex-shrink:0}
+.ph.done{color:var(--accent);border-color:rgba(124,181,24,.35);background:var(--al)}
+.ph.done .ph-n{background:var(--accent);color:#000;border-color:var(--accent)}
+.ph.act{color:#fff;border-color:var(--accent);background:rgba(124,181,24,.1)}
+.hhud{display:flex;gap:6px;margin-left:auto}
+.hpill{padding:4px 10px;border:1px solid var(--bdr2);background:var(--panel2);font-family:var(--ffm);font-size:.75rem;font-weight:800}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:bk .7s infinite;display:inline-block}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
+
+.scr{display:none}.scr.on{display:block}
+
+/* SETUP */
+.setup{padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.wolf-ico{font-size:3.8rem;animation:bob 3s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(124,181,24,.35))}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.eyebrow{font-size:.65rem;font-weight:700;letter-spacing:2.5px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase}
+.setup-title{font-size:1.7rem;font-weight:900;color:#fff;letter-spacing:.5px}
+.setup-meta{font-size:.82rem;color:var(--text2);line-height:1.7;max-width:460px}
+.setup-meta strong{color:var(--text)}
+.lv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:420px;width:100%}
+.lvc{background:var(--panel);border:2px solid var(--bdr);padding:14px 10px;text-align:center;cursor:pointer;transition:all .22s;border-radius:2px}
+.lvc:hover{background:var(--panel2)}
+.lvc.sel-e{border-color:var(--accent);background:rgba(124,181,24,.07)}
+.lvc.sel-m{border-color:var(--amber);background:rgba(245,158,11,.07)}
+.lvc.sel-h{border-color:var(--red);background:rgba(231,76,60,.07)}
+.lvc-ico{font-size:1.6rem;display:block;margin-bottom:5px}
+.lvc-name{font-size:.88rem;font-weight:800;margin-bottom:2px}
+.lvc-detail{font-size:.63rem;color:var(--text2);margin-bottom:4px;line-height:1.4}
+.lvc-pass{font-size:.63rem;font-weight:700;font-family:var(--ffm)}
+.pin-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.pin-lbl{font-size:.7rem;color:var(--text2);font-family:var(--ffm);font-weight:700}
+.pin-in{background:var(--panel2);border:2px solid var(--bdr2);color:var(--accent);font-family:var(--ffm);font-size:1.1rem;padding:9px 14px;width:88px;letter-spacing:5px;text-align:center;outline:none;transition:border-color .2s;border-radius:2px}
+.pin-in:focus{border-color:var(--accent)}
+.pin-err{font-size:.68rem;color:var(--red);font-family:var(--ffm);display:none}
+.pin-err.on{display:block}
+.deploy-btn{padding:12px 34px;font-size:.88rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:var(--accent);color:#000;border-radius:2px;transition:all .15s}
+.deploy-btn:hover{background:var(--accent2)}
+.pin-hint{font-size:.6rem;color:var(--text3);font-family:var(--ffm)}
+
+/* SWEEP */
+.wrap{padding:16px}
+.brief-card{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--bdr2);border-left:4px solid var(--accent);padding:13px 16px;margin-bottom:13px}
+.bc-eye{font-size:.6rem;font-weight:700;letter-spacing:2px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase;margin-bottom:5px}
+.bc-txt{font-size:.84rem;color:var(--text);line-height:1.6}
+.bc-txt strong{color:#fff}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.prog-track{flex:1;height:7px;background:rgba(255,255,255,.07)}
+.prog-fill{height:7px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .4s}
+.prog-lbl{font-size:.68rem;font-weight:800;color:var(--accent);font-family:var(--ffm);flex-shrink:0;min-width:36px;text-align:right}
+.score-lbl{font-size:.68rem;font-weight:800;color:var(--amber);font-family:var(--ffm);flex-shrink:0}
+
+/* PAPER */
+.paper{background:linear-gradient(160deg,#f8f4eb,#ece8d8);border:1px solid #c5b898;border-radius:2px;padding:18px 22px;box-shadow:0 4px 18px rgba(0,0,0,.55);position:relative;overflow:hidden;margin-bottom:13px}
+.paper::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 25px,rgba(0,0,150,.04) 25px,rgba(0,0,150,.04) 26px);pointer-events:none}
+.p-hdr{display:flex;justify-content:space-between;margin-bottom:10px}
+.p-src{font-size:.62rem;color:#6b4c20;font-weight:700;font-family:serif}
+.p-ref{font-size:.55rem;color:#8b6a40;text-align:right;line-height:1.4}
+.paper-q{font-size:.9rem;color:#1a1a1a;line-height:1.95;font-family:serif;user-select:none;-webkit-user-select:none}
+.qnum{display:inline-block;border:1.5px solid #c0392b;border-radius:50%;padding:0 5px;font-weight:700;color:#c0392b;margin-right:4px}
+
+/* BAKERY BOX VISUALS */
+.bakery-boxes{display:flex;gap:20px;align-items:flex-start;margin:12px 0;flex-wrap:wrap}
+.bbox{text-align:center}
+.bbox-visual{border:2px solid #6b4c20;background:rgba(200,160,80,.1);padding:10px 14px;margin-bottom:4px;border-radius:3px;font-size:.82rem;line-height:1.5;color:#3a2800;font-family:serif}
+.bbox-lbl{font-size:.72rem;color:#6b4c20;font-family:serif;font-weight:700}
+.bbox-price{font-size:.68rem;color:#6b4c20;font-family:serif}
+.donut-row{font-size:1rem;letter-spacing:2px;color:#6b4c20}
+
+/* KEYWORDS */
+.kw{cursor:pointer;padding:2px 5px;margin:0 1px;border-radius:2px;border-bottom:2.5px solid rgba(160,120,20,.8);background:rgba(200,160,30,.22);font-weight:700;transition:all .15s;display:inline;user-select:none;-webkit-user-select:none;color:#2a1800}
+.kw:hover:not(.done){background:rgba(200,160,30,.4)}
+.kw.done{cursor:default;pointer-events:none}
+.kw.correct{background:rgba(20,160,70,.28)!important;border-bottom-color:#22c55e!important;color:#0a3a10!important}
+.kw.correct::after{content:" [OK]";font-size:.5rem;color:#16a34a;font-weight:800}
+.kw.wrong{background:rgba(200,30,30,.28)!important;border-bottom-color:#ef4444!important;color:#5a0000!important;animation:kws .3s}
+.kw.wrong::after{content:" [X]";font-size:.5rem;color:#dc2626;font-weight:800}
+.kw.missed{background:rgba(245,158,11,.2)!important;border-bottom-color:var(--amber)!important;pointer-events:none}
+.kw.missed::after{content:" [!]";font-size:.5rem;color:var(--amber);font-weight:800}
+@keyframes kws{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.sweep-layout{display:grid;grid-template-columns:1fr 200px;gap:12px}
+@media(max-width:620px){.sweep-layout{grid-template-columns:1fr}}
+.side-box{background:var(--panel);border:1px solid var(--bdr);padding:11px;margin-bottom:8px}
+.sb-head{font-size:.58rem;font-weight:800;letter-spacing:1.5px;font-family:var(--ffm);text-transform:uppercase;border-bottom:1px solid var(--bdr);padding-bottom:4px;margin-bottom:7px}
+.sb-head.g{color:var(--accent)}.sb-head.r{color:var(--red)}
+.fi{display:flex;gap:5px;font-size:.7rem;padding:4px 0;border-bottom:1px solid var(--bdr);line-height:1.4}
+.fi:last-child{border-bottom:none}
+.fi-ok{color:var(--text)}.fi-bad{color:var(--red)}
+.feed-e{font-size:.6rem;color:var(--text3);font-style:italic;font-family:var(--ffm)}
+.submit-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.submit-btn{padding:10px 24px;font-size:.82rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;border:none;background:var(--accent);color:#000;border-radius:2px;transition:all .15s}
+.submit-btn:hover{background:var(--accent2)}
+.submit-note{font-size:.68rem;color:var(--text2);font-family:var(--ffm)}
+.sweep-res{display:none;background:var(--panel);border:2px solid var(--bdr2);padding:13px 16px;margin-top:11px;border-radius:2px}
+.sweep-res.on{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sr-pct{font-size:1.5rem;font-weight:900;font-family:var(--ffm)}
+.sr-txt{flex:1;font-size:.78rem;color:var(--text2);line-height:1.5}
+.sr-txt strong{color:var(--text)}
+.proceed-btn{padding:10px 20px;font-size:.78rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;border-radius:2px;transition:all .15s}
+
+/* SOLVER */
+.obj-sec{margin-bottom:18px}
+.obj-hdr{display:flex;align-items:center;gap:12px;margin-bottom:11px;padding:10px 14px;background:var(--panel2);border-left:4px solid}
+.obj-badge{font-size:.68rem;font-weight:900;padding:4px 12px;font-family:var(--ffm);letter-spacing:.5px}
+.obj-title{font-size:.95rem;font-weight:800;color:#fff}
+
+/* STEPS */
+.step{background:var(--panel);border:1px solid var(--bdr);padding:0;display:flex;gap:0;margin-bottom:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;border-radius:2px}
+.step:hover:not(.unlocked){background:var(--panel2);border-color:var(--bdr2)}
+.step-bar{width:4px;background:var(--text3);flex-shrink:0;transition:background .3s}
+.step.unlocked .step-bar{background:var(--accent)}
+.step-inner{flex:1;padding:13px 15px;display:flex;gap:13px}
+.step-n{width:26px;height:26px;border-radius:50%;border:2px solid var(--text3);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;font-family:var(--ffm);flex-shrink:0;color:var(--text3);transition:all .3s;margin-top:2px}
+.step.unlocked .step-n{border-color:var(--accent);color:var(--accent);background:var(--al)}
+.step-body{flex:1}
+.step-act{font-size:.72rem;font-weight:800;font-family:var(--ffm);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;color:var(--text3);transition:color .3s}
+.step.unlocked .step-act{color:var(--accent)}
+.step-hint{font-size:.63rem;color:var(--text3);font-style:italic;font-family:var(--ffm)}
+.step.unlocked .step-hint{display:none}
+.step-det{display:none;font-size:.86rem;color:var(--text);line-height:1.75;margin-top:5px}
+.step.unlocked .step-det{display:block}
+.s-ok{color:var(--accent);font-weight:700}
+.s-bad{color:var(--red);font-weight:700}
+.s-hl{color:var(--amber);font-weight:700}
+.s-formula{font-family:var(--ffm);font-size:.9rem;font-weight:800;color:#fff;background:var(--panel2);border:1px solid var(--bdr2);padding:7px 13px;margin-top:8px;display:inline-block;letter-spacing:.5px;border-radius:2px}
+
+/* BAR MODEL */
+.bm{display:none;margin-top:12px;padding:12px;background:rgba(0,0,0,.35);border:1px solid var(--bdr2);border-radius:2px}
+.step.unlocked .bm{display:block}
+.bm-eye{font-size:.6rem;font-weight:800;letter-spacing:1.5px;color:var(--blue);font-family:var(--ffm);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.bm-eye::before{content:"";width:3px;height:11px;background:var(--blue);display:inline-block}
+.bm-lbl{font-size:.7rem;color:var(--text2);font-family:var(--ffm);margin-bottom:5px}
+
+/* ANS BOX */
+.ans-box{display:none;background:linear-gradient(135deg,rgba(124,181,24,.09),rgba(124,181,24,.04));border:2px solid var(--accent);padding:15px 17px;margin-top:7px;border-radius:2px}
+.ans-box.on{display:block}
+.ans-lbl{font-size:.6rem;font-weight:800;letter-spacing:2px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase;margin-bottom:5px}
+.ans-val{font-size:1.3rem;font-weight:900;color:var(--accent);font-family:var(--ffm);margin-bottom:4px}
+.ans-chk{font-size:.73rem;color:var(--text2);line-height:1.5}
+.ans-chk strong{color:var(--accent)}
+.next-btn{display:none;margin-top:9px;padding:10px 22px;font-size:.78rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:var(--amber);color:#000;border-radius:2px;transition:all .15s}
+.next-btn.on{display:inline-block}.next-btn:hover{filter:brightness(1.1)}
+.finish-btn{display:none;margin-top:13px;padding:12px 30px;font-size:.84rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:var(--accent);color:#000;border-radius:2px;transition:all .15s}
+.finish-btn.on{display:inline-block}.finish-btn:hover{background:var(--accent2)}
+
+/* DEBRIEF */
+.debrief{padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.db-stars{display:flex;gap:6px;justify-content:center}
+.db-star{font-size:2.2rem;animation:sp .4s ease-out both}
+@keyframes sp{0%{transform:scale(0) rotate(-10deg)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+.db-title{font-size:1.7rem;font-weight:900;color:#fff}
+.db-title span{color:var(--accent)}
+.db-sub{font-size:.8rem;color:var(--text2);line-height:1.6;max-width:420px}
+.db-stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:440px;width:100%}
+.dbs{background:var(--panel);border:1px solid var(--bdr2);padding:11px 14px;flex:1;min-width:76px;text-align:center}
+.dbs-v{font-size:1.2rem;font-weight:900;font-family:var(--ffm);display:block;margin-bottom:2px}
+.dbs-l{font-size:.57rem;color:var(--text2);font-family:var(--ffm);letter-spacing:.5px;text-transform:uppercase}
+.answers-panel{background:var(--panel);border:1px solid var(--bdr2);padding:14px 16px;max-width:500px;width:100%;border-radius:2px}
+.ap-t{font-size:.6rem;font-weight:800;letter-spacing:2px;color:var(--accent);font-family:var(--ffm);text-transform:uppercase;padding-bottom:7px;border-bottom:1px solid var(--bdr);margin-bottom:9px}
+.ap-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:.8rem}
+.ap-row:last-child{border-bottom:none}
+.ap-q{color:var(--text2);flex:1;padding-right:8px}
+.ap-a{font-size:.9rem;font-weight:900;color:var(--accent);font-family:var(--ffm)}
+.db-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.db-main{padding:12px 28px;font-size:.82rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:var(--accent);color:#000;border-radius:2px;transition:all .15s}
+.db-main:hover{background:var(--accent2)}
+.db-sec{padding:12px 18px;font-size:.77rem;font-weight:700;text-transform:uppercase;cursor:pointer;background:transparent;border:1px solid var(--bdr2);color:var(--text2);border-radius:2px}
+.pop-float{position:fixed;font-family:var(--ffm);font-size:.85rem;font-weight:900;pointer-events:none;animation:pf 1.1s ease-out forwards;z-index:999}
+@keyframes pf{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-48px)}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="hdr">
+    <div class="logo"><span>D</span>-WOLF</div>
+    <div class="hdiv"></div>
+    <div class="htitle">MKG-017 &middot; BAKERY SUPPLY OP</div>
+    <div class="phases">
+      <div class="ph act" id="ph0"><div class="ph-n">1</div>SWEEP</div>
+      <div class="ph" id="ph1"><div class="ph-n">2</div>SOLVE</div>
+      <div class="ph" id="ph2"><div class="ph-n">3</div>DEBRIEF</div>
+    </div>
+    <div class="hhud">
+      <div class="hpill" id="hpill-score" style="color:var(--amber)">100 PTS</div>
+      <div class="hpill" id="hpill-level" style="color:var(--accent)">EASY</div>
+      <div class="hpill"><span class="dot"></span>&nbsp;LIVE</div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="scr on" id="s0">
+    <div class="setup">
+      <div class="wolf-ico">&#x1F43A;</div>
+      <div class="eyebrow">// PARENT COMMAND // MKG-017 //</div>
+      <h1 class="setup-title">Mission Briefing</h1>
+      <p class="setup-meta">
+        <strong>BAKERY SUPPLY OP</strong> &mdash; Pitaya C2S4 Q17<br>
+        Topic: Ratio, Fraction &amp; Box Counting &middot; 3 objectives<br>
+        Concepts: Multiples, Fraction of remainder, System of equations<br><br>
+        Select difficulty and enter parent PIN to deploy.
+      </p>
+      <div class="lv-grid">
+        <div class="lvc sel-e" id="lvc-easy" onclick="selLv('easy')">
+          <span class="lvc-ico">&#x1F7E2;</span>
+          <div class="lvc-name" style="color:var(--accent)">EASY</div>
+          <div class="lvc-detail">Words highlighted<br>-15 pts wrong</div>
+          <div class="lvc-pass" style="color:var(--accent)">60% pass</div>
+        </div>
+        <div class="lvc" id="lvc-medium" onclick="selLv('medium')">
+          <span class="lvc-ico">&#x1F7E1;</span>
+          <div class="lvc-name" style="color:var(--amber)">MEDIUM</div>
+          <div class="lvc-detail">Plain paper<br>-20 pts wrong</div>
+          <div class="lvc-pass" style="color:var(--amber)">75% pass</div>
+        </div>
+        <div class="lvc" id="lvc-hard" onclick="selLv('hard')">
+          <span class="lvc-ico">&#x1F534;</span>
+          <div class="lvc-name" style="color:var(--red)">HARD</div>
+          <div class="lvc-detail">60s timer<br>-30 pts wrong</div>
+          <div class="lvc-pass" style="color:var(--red)">90% pass</div>
+        </div>
+      </div>
+      <div class="pin-wrap">
+        <span class="pin-lbl">PARENT PIN:</span>
+        <input class="pin-in" type="password" id="pin" maxlength="4" placeholder="****" onkeydown="if(event.key==='Enter')deploy()">
+        <button class="deploy-btn" onclick="deploy()">DEPLOY MISSION</button>
+      </div>
+      <div class="pin-err" id="pin-err">Wrong PIN &mdash; demo PIN: 1234</div>
+      <div class="pin-hint">Demo PIN is: 1234</div>
+    </div>
+  </div>
+
+  <!-- SWEEP -->
+  <div class="scr" id="s1">
+    <div class="wrap">
+      <div class="brief-card">
+        <div class="bc-eye">// PHASE 1 &middot; INTEL EXTRACTION &middot; KEYWORD SWEEP //</div>
+        <div class="bc-txt" id="brief-txt">
+          Tap the <strong>highlighted words</strong> to extract intel.
+          Find all <strong>8 real data keywords</strong>.
+          Wrong taps cost <strong style="color:var(--red)">-15 pts</strong>!
+        </div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
+        <div class="prog-lbl" id="prog-lbl">0 / 8</div>
+        <div class="score-lbl" id="score-lbl">100 PTS</div>
+      </div>
+
+      <div class="sweep-layout">
+        <div>
+          <div class="paper">
+            <div class="p-hdr">
+              <div class="p-src">pitaya</div>
+              <div class="p-ref">Past Year Prelim &middot; Maths C2S4<br>RATIO, FRACTION AND PERCENTAGE</div>
+            </div>
+            <div class="paper-q">
+              <span class="qnum">17</span>
+              In a bakery, donuts and cupcakes are sold only in boxes.
+              A box of
+              <span class="kw" id="kw1" onclick="tap('kw1',1,'8 donuts per box - key unit for working out minimum boxes needed!')">8 donuts</span>
+              costs
+              <span class="kw" id="kw2" onclick="tap('kw2',1,'$15 per donut box - key price to calculate Alice spending!')">$15</span>
+              and a box of
+              <span class="kw" id="kw3" onclick="tap('kw3',1,'5 cupcakes per box - key unit for minimum boxes needed!')">5 cupcakes</span>
+              costs
+              <span class="kw" id="kw4" onclick="tap('kw4',1,'$7 per cupcake box - key price!')">$7</span>.
+              Alice and Ben were given a sum of money to buy donuts and cupcakes from the bakery.
+
+              <!-- Bakery visual -->
+              <div class="bakery-boxes">
+                <div class="bbox">
+                  <div class="bbox-visual">
+                    <div class="donut-row">&#x1F369;&#x1F369;&#x1F369;&#x1F369;</div>
+                    <div class="donut-row">&#x1F369;&#x1F369;&#x1F369;&#x1F369;</div>
+                  </div>
+                  <div class="bbox-lbl">1 box of 8 donuts</div>
+                  <div class="bbox-price">$15</div>
+                </div>
+                <div class="bbox">
+                  <div class="bbox-visual">
+                    <div class="donut-row">&#x1F9C1;&#x1F9C1;&#x1F9C1;&#x1F9C1;&#x1F9C1;</div>
+                  </div>
+                  <div class="bbox-lbl">1 box of 5 cupcakes</div>
+                  <div class="bbox-price">$7</div>
+                </div>
+              </div>
+
+              Alice needed
+              <span class="kw" id="kw5" onclick="tap('kw5',1,'20 donuts needed - must buy in boxes of 8, so minimum 3 boxes = 24 donuts!')">20 donuts</span>
+              and
+              <span class="kw" id="kw6" onclick="tap('kw6',1,'3 cupcakes needed - must buy 1 box of 5. Key for least cost!')">3 cupcakes</span>
+              for her party. After buying the donuts and cupcakes from the bakery, Alice passed the rest of the money to Ben.
+
+              <br><br>
+              <strong>(a)</strong> What was the <span class="kw" id="kw7" onclick="tap('kw7',0,'MINE! &quot;least amount&quot; is the question instruction, not a data value!')">least amount</span> of money Alice spend?
+
+              <br><br>
+              <strong>(b)</strong> Ben spent
+              <span class="kw" id="kw8" onclick="tap('kw8',1,'4/7 of the rest - key fraction! Ben keeps 3/7 of the remainder he received.')">4/7</span>
+              of the rest of the money to buy donuts and cupcakes for his party and had
+              <span class="kw" id="kw9" onclick="tap('kw9',1,'1/3 of the total sum left at the end - key equation to find total S!')">1/3</span>
+              of the sum of money left. What fraction of the sum of money did Alice spend?
+
+              <br><br>
+              <strong>(c)</strong> How many
+              <span class="kw" id="kw10" onclick="tap('kw10',0,'MINE! &quot;donuts and cupcakes&quot; is the question instruction, not a data value!')">donuts and cupcakes</span>
+              did Ben buy?
+            </div>
+          </div>
+
+          <div id="submit-area">
+            <div class="submit-row">
+              <button class="submit-btn" onclick="submitSweep()">TRANSMIT INTEL</button>
+              <span class="submit-note" id="submit-note">Tap keywords first, then submit</span>
+            </div>
+          </div>
+          <div class="sweep-res" id="sweep-res">
+            <div>
+              <div style="font-size:.6rem;color:var(--text2);font-family:var(--ffm);margin-bottom:2px">ACCURACY</div>
+              <div class="sr-pct" id="sr-pct">--</div>
+            </div>
+            <div class="sr-txt" id="sr-txt"></div>
+            <button class="proceed-btn" id="proceed-btn" onclick="goSolve()" style="background:var(--accent);color:#000">PROCEED TO SOLVE</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="side-box">
+            <div class="sb-head g">INTEL EXTRACTED</div>
+            <div id="intel-list"><div class="feed-e">tap keywords to extract</div></div>
+          </div>
+          <div class="side-box">
+            <div class="sb-head r">MINES HIT</div>
+            <div id="mines-list"><div class="feed-e">none yet</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLVER -->
+  <div class="scr" id="s2">
+    <div class="wrap">
+      <div class="brief-card" style="border-left-color:var(--blue)">
+        <div class="bc-eye" style="color:var(--blue)">// PHASE 2 &middot; MISSION SOLVE &middot; STEP-BY-STEP WITH BAR MODELS //</div>
+        <div class="bc-txt">Tap each step to unlock. Bar models show the Singapore model drawing method.</div>
+      </div>
+
+      <!-- OBJ A -->
+      <div class="obj-sec">
+        <div class="obj-hdr" style="border-color:var(--accent)">
+          <div class="obj-badge" style="background:var(--al);color:var(--accent)">OBJ-A</div>
+          <div class="obj-title">Part (a) &mdash; Least amount Alice spent</div>
+        </div>
+
+        <div class="step" id="sa1" onclick="unlk('sa1')">
+          <div class="step-bar"></div>
+          <div class="step-inner">
+            <div class="step-n">1</div>
+            <div class="step-body">
+              <div class="step-act">Find minimum donut boxes</div>
+              <div class="step-hint">Tap to unlock this step</div>
+              <div class="step-det">
+                Alice needs <strong>20 donuts</strong>. Sold in boxes of 8 only.<br>
+                1 box = 8 donuts &nbsp; 2 boxes = 16 donuts &nbsp; <span class="s-bad">not enough</span><br>
+                3 boxes = 24 donuts &ge; 20 &nbsp; <span class="s-ok">minimum!</span><br>
+                Cost = 3 &times; $15
+                <div class="bm">
+                  <div class="bm-eye">BAR MODEL &mdash; Donut Boxes</div>
+                  <div class="bm-lbl">Donuts needed vs boxes bought</div>
+                  <svg width="100%" height="70" viewBox="0 0 460 70" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="12" font-family="Segoe UI,Arial" font-size="11" fill="var(--text2)">Need at least 20 donuts:</text>
+                    <!-- 3 boxes of 8 -->
+                    <rect x="0" y="16" width="115" height="30" fill="rgba(124,181,24,.2)" stroke="var(--accent)" stroke-width="2"/>
+                    <rect x="115" y="16" width="115" height="30" fill="rgba(124,181,24,.2)" stroke="var(--accent)" stroke-width="2"/>
+                    <rect x="230" y="16" width="115" height="30" fill="rgba(124,181,24,.2)" stroke="var(--accent)" stroke-width="2"/>
+                    <text x="57" y="36" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12" font-weight="700" fill="var(--accent)">Box 1 (8)</text>
+                    <text x="172" y="36" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12" font-weight="700" fill="var(--accent)">Box 2 (8)</text>
+                    <text x="287" y="36" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12" font-weight="700" fill="var(--accent)">Box 3 (8)</text>
+                    <!-- "need 20" marker -->
+                    <line x1="307" y1="12" x2="307" y2="52" stroke="var(--red)" stroke-width="2" stroke-dasharray="4,2"/>
+                    <text x="310" y="26" font-family="Courier New" font-size="10" font-weight="800" fill="var(--red)">need 20</text>
+                    <!-- total label -->
+                    <text x="172" y="62" text-anchor="middle" font-family="Courier New,monospace" font-size="11" font-weight="800" fill="#d4e4a0">3 boxes = 24 donuts &gt;= 20 OK</text>
+                  </svg>
+                </div>
+                <div class="s-formula">3 boxes &times; $15 = $45</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step" id="sa2" onclick="unlk('sa2')">
+          <div class="step-bar"></div>
+          <div class="step-inner">
+            <div class="step-n">2</div>
+            <div class="step-body">
+              <div class="step-act">Find minimum cupcake boxes</div>
+              <div class="step-hint">Tap to unlock this step</div>
+              <div class="step-det">
+                Alice needs <strong>3 cupcakes</strong>. Sold in boxes of 5 only.<br>
+                1 box = 5 cupcakes &ge; 3 &nbsp; <span class="s-ok">minimum!</span><br>
+                Cost = 1 &times; $7
+                <div class="bm">
+                  <div class="bm-eye">BAR MODEL &mdash; Cupcake Boxes</div>
+                  <div class="bm-lbl">Cupcakes needed vs box bought</div>
+                  <svg width="100%" height="58" viewBox="0 0 460 58" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="8" width="230" height="30" fill="rgba(56,189,248,.2)" stroke="var(--blue)" stroke-width="2"/>
+                    <text x="115" y="28" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12" font-weight="700" fill="var(--blue)">1 box = 5 cupcakes</text>
+                    <line x1="138" y1="5" x2="138" y2="45" stroke="var(--red)" stroke-width="2" stroke-dasharray="4,2"/>
+                    <text x="142" y="20" font-family="Courier New" font-size="10" font-weight="800" fill="var(--red)">need 3</text>
+                    <text x="115" y="52" text-anchor="middle" font-family="Courier New,monospace" font-size="11" font-weight="800" fill="#d4e4a0">1 box = 5 cupcakes &gt;= 3 OK</text>
+                  </svg>
+                </div>
+                <div class="s-formula">1 box &times; $7 = $7</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step" id="sa3" onclick="unlk('sa3')">
+          <div class="step-bar"></div>
+          <div class="step-inner">
+            <div class="step-n">3</div>
+            <div class="step-body">
+              <div class="step-act">Add up least amount Alice spent</div>
+              <div class="step-hint">Tap to unlock this step</div>
+              <div class="step-det">
+                Donuts: 3 boxes &times; $15 = <strong>$45</strong><br>
+                Cupcakes: 1 box &times; $7 = <strong>$7</strong><br>
+                Total least amount = $45 + $7
+                <div class="s-formula">= $52</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ans-box" id="ans-a">
+          <div class="ans-lbl">OBJ-A ANSWER</div>
+          <div class="ans-val">Alice spent at least $52</div>
+          <div class="ans-chk">Check: 3 boxes donuts (24 &ge; 20 <strong>OK</strong>) &middot; 1 box cupcakes (5 &ge; 3 <strong>OK</strong>)</div>
+        </div>
+        <button class="next-btn" id="next-btn-a" onclick="showB()">PROCEED TO PART B</button>
+      </div>
+
+      <!-- OBJ B -->
+      <div id="obj-b" style="display:none">
+        <div class="obj-sec">
+          <div class="obj-hdr" style="border-color:var(--amber)">
+            <div class="obj-badge" style="background:var(--aml);color:var(--amber)">OBJ-B</div>
+            <div class="obj-title">Part (b) &mdash; What fraction of sum did Alice spend?</div>
+          </div>
+
+          <div class="step" id="sb1" onclick="unlk('sb1')">
+            <div class="step-bar"></div>
+            <div class="step-inner">
+              <div class="step-n">1</div>
+              <div class="step-body">
+                <div class="step-act">Set up the equation</div>
+                <div class="step-hint">Tap to unlock this step</div>
+                <div class="step-det">
+                  Let total sum = <strong>S</strong><br>
+                  Alice spent <strong>$52</strong>, so Ben received <strong>(S &minus; 52)</strong><br>
+                  Ben spent 4/7 of (S&minus;52) and had 1/3 of S left<br><br>
+                  What Ben has left = (S&minus;52) &minus; 4/7(S&minus;52) = 3/7(S&minus;52)<br>
+                  This equals 1/3 of S:
+                  <div class="s-formula">3/7 &times; (S &minus; 52) = S/3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="sb2" onclick="unlk('sb2')">
+            <div class="step-bar"></div>
+            <div class="step-inner">
+              <div class="step-n">2</div>
+              <div class="step-body">
+                <div class="step-act">Draw Ben's money as 7 equal units</div>
+                <div class="step-hint">Tap to unlock this step</div>
+                <div class="step-det">
+                  Ben spent <strong>4/7</strong> of what he received, so he kept <strong>3/7</strong>.<br>
+                  Draw Ben's money as <strong>7 equal boxes</strong>:
+                  <div class="bm">
+                    <div class="bm-eye">BAR MODEL STEP 1 &mdash; Ben's Money = 7 Units</div>
+                    <svg width="100%" height="52" viewBox="0 0 460 52" xmlns="http://www.w3.org/2000/svg">
+                      <text x="0" y="11" font-family="Segoe UI,Arial" font-size="11" fill="var(--text2)">Ben's money (7 equal units):</text>
+                      <!-- 4 spent units -->
+                      <rect x="0" y="15" width="66" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="66" y="15" width="66" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="132" y="15" width="66" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="198" y="15" width="66" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <!-- 3 kept units -->
+                      <rect x="264" y="15" width="66" height="28" fill="rgba(56,189,248,.25)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <rect x="330" y="15" width="66" height="28" fill="rgba(56,189,248,.25)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <rect x="396" y="15" width="64" height="28" fill="rgba(56,189,248,.25)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <!-- labels -->
+                      <text x="132" y="34" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11" font-weight="700" fill="var(--purple)">4 units SPENT</text>
+                      <text x="363" y="34" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11" font-weight="700" fill="var(--blue)">3 units KEPT</text>
+                    </svg>
+                  </div>
+                  <br>
+                  Ben <strong>kept 3 units</strong> = <strong>1/3 of total sum</strong>.<br>
+                  So if 3 units = 1/3 of total&hellip; the total must be <strong>3 &times; 3 = 9 units</strong>!
+                  <div class="bm">
+                    <div class="bm-eye">BAR MODEL STEP 2 &mdash; Total Sum = 9 Units</div>
+                    <svg width="100%" height="100" viewBox="0 0 460 100" xmlns="http://www.w3.org/2000/svg">
+                      <text x="0" y="11" font-family="Segoe UI,Arial" font-size="11" fill="var(--text2)">Total sum (9 equal units):</text>
+                      <!-- Row 1: Total = 9 units (Alice=2, Ben=7) -->
+                      <!-- Alice: 2/9 = 102px -->
+                      <rect x="0" y="15" width="51" height="28" fill="rgba(245,158,11,.25)" stroke="var(--amber)" stroke-width="1.5"/>
+                      <rect x="51" y="15" width="51" height="28" fill="rgba(245,158,11,.25)" stroke="var(--amber)" stroke-width="1.5"/>
+                      <!-- Ben 7 units -->
+                      <rect x="102" y="15" width="51" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="153" y="15" width="51" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="204" y="15" width="51" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="255" y="15" width="51" height="28" fill="rgba(167,139,250,.25)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="306" y="15" width="51" height="28" fill="rgba(56,189,248,.25)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <rect x="357" y="15" width="51" height="28" fill="rgba(56,189,248,.25)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <rect x="408" y="15" width="52" height="28" fill="rgba(56,189,248,.25)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <!-- unit numbers -->
+                      <text x="25" y="33" text-anchor="middle" font-family="Courier New" font-size="10" font-weight="800" fill="var(--amber)">1</text>
+                      <text x="76" y="33" text-anchor="middle" font-family="Courier New" font-size="10" font-weight="800" fill="var(--amber)">2</text>
+                      <text x="127" y="33" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">3</text>
+                      <text x="178" y="33" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">4</text>
+                      <text x="229" y="33" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">5</text>
+                      <text x="280" y="33" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">6</text>
+                      <text x="331" y="33" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--blue)">7</text>
+                      <text x="382" y="33" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--blue)">8</text>
+                      <text x="433" y="33" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--blue)">9</text>
+                      <!-- braces for Alice and Ben -->
+                      <line x1="0" y1="50" x2="102" y2="50" stroke="rgba(245,158,11,.5)" stroke-width="1.5"/>
+                      <line x1="0" y1="46" x2="0" y2="54" stroke="rgba(245,158,11,.5)" stroke-width="1.5"/>
+                      <line x1="102" y1="46" x2="102" y2="54" stroke="rgba(245,158,11,.5)" stroke-width="1.5"/>
+                      <text x="51" y="63" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11" font-weight="700" fill="var(--amber)">Alice = 2 units</text>
+                      <line x1="102" y1="50" x2="460" y2="50" stroke="rgba(167,139,250,.5)" stroke-width="1.5"/>
+                      <line x1="460" y1="46" x2="460" y2="54" stroke="rgba(167,139,250,.5)" stroke-width="1.5"/>
+                      <text x="281" y="63" text-anchor="middle" font-family="Segoe UI,Arial" font-size="11" font-weight="700" fill="var(--purple)">Ben = 7 units</text>
+                      <!-- total brace -->
+                      <line x1="0" y1="74" x2="460" y2="74" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+                      <line x1="0" y1="70" x2="0" y2="78" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+                      <line x1="460" y1="70" x2="460" y2="78" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+                      <text x="230" y="90" text-anchor="middle" font-family="Courier New,monospace" font-size="11" font-weight="800" fill="#d4e4a0">Total = 9 units &nbsp; (because Ben kept 3 units = 1/3 of total)</text>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="sb2b" onclick="unlk('sb2b')">
+            <div class="step-bar"></div>
+            <div class="step-inner">
+              <div class="step-n" style="font-size:.6rem">2b</div>
+              <div class="step-body">
+                <div class="step-act">Find value of 1 unit</div>
+                <div class="step-hint">Tap to unlock this step</div>
+                <div class="step-det">
+                  From the model: Alice's 2 units = <strong>$52</strong><br><br>
+                  So 1 unit = $52 &divide; 2 = <strong>$26</strong><br><br>
+                  Total sum = 9 units = 9 &times; $26
+                  <div class="bm">
+                    <div class="bm-eye">BAR MODEL STEP 3 &mdash; Value of Each Unit</div>
+                    <svg width="100%" height="58" viewBox="0 0 460 58" xmlns="http://www.w3.org/2000/svg">
+                      <!-- 9 units with dollar values -->
+                      <rect x="0" y="6" width="51" height="32" fill="rgba(245,158,11,.25)" stroke="var(--amber)" stroke-width="1.5"/>
+                      <rect x="51" y="6" width="51" height="32" fill="rgba(245,158,11,.25)" stroke="var(--amber)" stroke-width="1.5"/>
+                      <rect x="102" y="6" width="51" height="32" fill="rgba(167,139,250,.2)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="153" y="6" width="51" height="32" fill="rgba(167,139,250,.2)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="204" y="6" width="51" height="32" fill="rgba(167,139,250,.2)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="255" y="6" width="51" height="32" fill="rgba(167,139,250,.2)" stroke="var(--purple)" stroke-width="1.5"/>
+                      <rect x="306" y="6" width="51" height="32" fill="rgba(56,189,248,.2)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <rect x="357" y="6" width="51" height="32" fill="rgba(56,189,248,.2)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <rect x="408" y="6" width="52" height="32" fill="rgba(56,189,248,.2)" stroke="var(--blue)" stroke-width="1.5"/>
+                      <!-- dollar labels -->
+                      <text x="25" y="26" text-anchor="middle" font-family="Courier New" font-size="11" font-weight="800" fill="var(--amber)">$26</text>
+                      <text x="76" y="26" text-anchor="middle" font-family="Courier New" font-size="11" font-weight="800" fill="var(--amber)">$26</text>
+                      <text x="127" y="26" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">$26</text>
+                      <text x="178" y="26" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">$26</text>
+                      <text x="229" y="26" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">$26</text>
+                      <text x="280" y="26" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--purple)">$26</text>
+                      <text x="331" y="26" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--blue)">$26</text>
+                      <text x="382" y="26" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--blue)">$26</text>
+                      <text x="433" y="26" text-anchor="middle" font-family="Courier New" font-size="10" fill="var(--blue)">$26</text>
+                      <!-- Alice label -->
+                      <text x="51" y="50" text-anchor="middle" font-family="Courier New" font-size="10" font-weight="800" fill="var(--amber)">$52 Alice</text>
+                      <text x="230" y="50" text-anchor="middle" font-family="Courier New" font-size="11" font-weight="800" fill="#d4e4a0">Total = 9 x $26 = $234</text>
+                    </svg>
+                  </div>
+                  <div class="s-formula">Total S = $234 &nbsp;|&nbsp; 1 unit = $26</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="sb3" onclick="unlk('sb3')">
+            <div class="step-bar"></div>
+            <div class="step-inner">
+              <div class="step-n">3</div>
+              <div class="step-body">
+                <div class="step-act">Find the fraction Alice spent</div>
+                <div class="step-hint">Tap to unlock this step</div>
+                <div class="step-det">
+                  Total sum S = $234<br>
+                  Alice spent = $52<br>
+                  Fraction = 52 &divide; 234<br>
+                  GCD(52, 234) = 26 &nbsp; (52 = 2&times;26, 234 = 9&times;26)<br>
+                  52/234 = (52&divide;26) / (234&divide;26) = 2/9
+                  <div class="s-formula">Alice spent 2/9 of the sum</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ans-box" id="ans-b">
+            <div class="ans-lbl">OBJ-B ANSWER</div>
+            <div class="ans-val">Alice spent 2/9 of the total sum</div>
+            <div class="ans-chk">Check: Ben gets $182. 4/7 &times; 182 = $104 spent. Ben keeps $78 = 1/3 &times; $234 <strong>OK</strong></div>
+          </div>
+          <button class="next-btn" id="next-btn-b" onclick="showC()">PROCEED TO PART C</button>
+        </div>
+      </div>
+
+      <!-- OBJ C -->
+      <div id="obj-c" style="display:none">
+        <div class="obj-sec">
+          <div class="obj-hdr" style="border-color:var(--blue)">
+            <div class="obj-badge" style="background:var(--bl);color:var(--blue)">OBJ-C</div>
+            <div class="obj-title">Part (c) &mdash; How many donuts and cupcakes did Ben buy?</div>
+          </div>
+
+          <div class="step" id="sc1" onclick="unlk('sc1')">
+            <div class="step-bar"></div>
+            <div class="step-inner">
+              <div class="step-n">1</div>
+              <div class="step-body">
+                <div class="step-act">Find how much Ben spent</div>
+                <div class="step-hint">Tap to unlock this step</div>
+                <div class="step-det">
+                  Ben received S &minus; 52 = 234 &minus; 52 = <strong>$182</strong><br>
+                  Ben spent 4/7 &times; 182 = <strong>$104</strong><br>
+                  Need to find boxes: 15d + 7c = 104 &nbsp; (d = donut boxes, c = cupcake boxes)
+                  <div class="s-formula">15d + 7c = $104</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="sc2" onclick="unlk('sc2')">
+            <div class="step-bar"></div>
+            <div class="step-inner">
+              <div class="step-n">2</div>
+              <div class="step-body">
+                <div class="step-act">Test values systematically</div>
+                <div class="step-hint">Tap to unlock this step</div>
+                <div class="step-det">
+                  Try different numbers of donut boxes (d):<br><br>
+                  d=1: 7c = 104&minus;15 = 89 &nbsp; 89&divide;7 = 12.7 <span class="s-bad">not whole</span><br>
+                  d=2: 7c = 104&minus;30 = 74 &nbsp; 74&divide;7 = 10.6 <span class="s-bad">not whole</span><br>
+                  d=3: 7c = 104&minus;45 = 59 &nbsp; 59&divide;7 = 8.4 <span class="s-bad">not whole</span><br>
+                  d=4: 7c = 104&minus;60 = 44 &nbsp; 44&divide;7 = 6.3 <span class="s-bad">not whole</span><br>
+                  d=5: 7c = 104&minus;75 = 29 &nbsp; 29&divide;7 = 4.1 <span class="s-bad">not whole</span><br>
+                  d=6: 7c = 104&minus;90 = 14 &nbsp; 14&divide;7 = <strong>2</strong> <span class="s-ok">whole number!</span>
+                  <div class="s-formula">d = 6 donut boxes, c = 2 cupcake boxes</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="sc3" onclick="unlk('sc3')">
+            <div class="step-bar"></div>
+            <div class="step-inner">
+              <div class="step-n">3</div>
+              <div class="step-body">
+                <div class="step-act">Count total donuts and cupcakes</div>
+                <div class="step-hint">Tap to unlock this step</div>
+                <div class="step-det">
+                  6 boxes of donuts = 6 &times; 8 = <strong>48 donuts</strong><br>
+                  2 boxes of cupcakes = 2 &times; 5 = <strong>10 cupcakes</strong><br>
+                  Cost check: 6&times;$15 + 2&times;$7 = $90 + $14 = $104 <span class="s-ok">OK!</span>
+                  <div class="bm">
+                    <div class="bm-eye">BAR MODEL &mdash; Ben's Purchase</div>
+                    <div class="bm-lbl">$104 split across boxes</div>
+                    <svg width="100%" height="65" viewBox="0 0 460 65" xmlns="http://www.w3.org/2000/svg">
+                      <!-- 90/104 = 397px for donuts, 14/104 = 62px for cupcakes -->
+                      <rect x="0" y="6" width="398" height="34" fill="rgba(124,181,24,.2)" stroke="var(--accent)" stroke-width="2"/>
+                      <rect x="398" y="6" width="62" height="34" fill="rgba(56,189,248,.2)" stroke="var(--blue)" stroke-width="2"/>
+                      <line x1="398" y1="6" x2="398" y2="40" stroke="#fff" stroke-width="1.5" stroke-dasharray="4,2"/>
+                      <text x="199" y="28" text-anchor="middle" font-family="Segoe UI,Arial" font-size="12" font-weight="700" fill="var(--accent)">6 boxes donuts = $90</text>
+                      <text x="429" y="28" text-anchor="middle" font-family="Segoe UI,Arial" font-size="10" font-weight="700" fill="var(--blue)">2 boxes $14</text>
+                      <text x="230" y="56" text-anchor="middle" font-family="Courier New,monospace" font-size="11" font-weight="800" fill="#d4e4a0">Total = $104 OK</text>
+                    </svg>
+                  </div>
+                  <div class="s-formula">48 donuts and 10 cupcakes</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ans-box" id="ans-c">
+            <div class="ans-lbl">OBJ-C ANSWER</div>
+            <div class="ans-val">48 donuts and 10 cupcakes</div>
+            <div class="ans-chk">Check: 6&times;$15 + 2&times;$7 = $90 + $14 = $104 <strong>OK</strong> &middot; Ben spent 4/7 of $182 = $104 <strong>OK</strong></div>
+          </div>
+          <button class="finish-btn" id="finish-btn" onclick="goDebrief()">MISSION COMPLETE &mdash; DEBRIEF</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DEBRIEF -->
+  <div class="scr" id="s3">
+    <div class="debrief">
+      <div class="wolf-ico">&#x1F43A;</div>
+      <div class="eyebrow">// MISSION MKG-017 COMPLETE //</div>
+      <div class="db-stars" id="db-stars"></div>
+      <h2 class="db-title">Intel <span>Secured</span></h2>
+      <p class="db-sub">All three objectives cleared. Bakery Supply Op archived in your mission log.</p>
+      <div class="db-stats">
+        <div class="dbs"><span class="dbs-v" id="db-score" style="color:var(--amber)">--</span><span class="dbs-l">SCORE</span></div>
+        <div class="dbs"><span class="dbs-v" id="db-acc" style="color:var(--accent)">--</span><span class="dbs-l">ACCURACY</span></div>
+        <div class="dbs"><span class="dbs-v" id="db-xp" style="color:var(--blue)">--</span><span class="dbs-l">XP</span></div>
+        <div class="dbs"><span class="dbs-v" id="db-coins" style="color:var(--amber)">--</span><span class="dbs-l">COINS</span></div>
+      </div>
+      <div class="answers-panel">
+        <div class="ap-t">// MISSION ANSWERS</div>
+        <div class="ap-row"><div class="ap-q">Part (a) &mdash; Least amount Alice spent</div><div class="ap-a">$52</div></div>
+        <div class="ap-row"><div class="ap-q">Part (b) &mdash; Fraction Alice spent of total</div><div class="ap-a">2/9</div></div>
+        <div class="ap-row"><div class="ap-q">Part (c) &mdash; Donuts Ben bought</div><div class="ap-a">48</div></div>
+        <div class="ap-row"><div class="ap-q">Part (c) &mdash; Cupcakes Ben bought</div><div class="ap-a">10</div></div>
+        <div class="ap-row" style="background:rgba(124,181,24,.04)">
+          <div class="ap-q">Key concepts</div>
+          <div class="ap-a" style="font-size:.68rem;color:var(--text2)">Multiples &middot; Fractions &middot; Equations</div>
+        </div>
+      </div>
+      <div class="db-btns">
+        <button class="db-main" onclick="window.location.href='../index.html'">MISSION BOARD</button>
+        <button class="db-sec" onclick="location.reload()">RETRY</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+var lv='easy',score=100,correct=0,wrong=0,TOTAL=8,stepsUnlocked=0,hardTimer=null;
+var penMap={easy:15,medium:20,hard:30};
+var passMap={easy:60,medium:75,hard:90};
+
+function selLv(x){
+  lv=x;
+  var m={easy:'sel-e',medium:'sel-m',hard:'sel-h'};
+  ['easy','medium','hard'].forEach(function(k){
+    var el=document.getElementById('lvc-'+k);
+    if(el) el.className='lvc'+(k===x?' '+m[k]:'');
+  });
+}
+
+function deploy(){
+  var p=document.getElementById('pin');
+  if(!p||p.value!=='1234'){
+    var e=document.getElementById('pin-err');
+    if(e) e.classList.add('on');
+    if(p) p.value='';
+    return;
+  }
+  var lel=document.getElementById('hpill-level');
+  if(lel) lel.textContent=lv.toUpperCase();
+  goScr('s1'); setPhase(0); updateBrief();
+  if(lv==='hard') startTimer();
+}
+
+function updateBrief(){
+  var el=document.getElementById('brief-txt');
+  if(!el) return;
+  var pen=penMap[lv]||15;
+  if(lv==='easy'){
+    el.innerHTML='Tap the <strong>highlighted words</strong> to extract intel. Find all <strong>8 real data keywords</strong>. Wrong taps cost <strong style="color:var(--red)">-'+pen+' pts</strong>!';
+  } else if(lv==='medium'){
+    el.innerHTML='Plain paper mode. Find <strong>8 keywords</strong>. Wrong taps cost <strong style="color:var(--red)">-'+pen+' pts</strong>!';
+  } else {
+    el.innerHTML='<strong style="color:var(--red)">HARD MODE</strong> - 60s timer! Find 8 keywords. Wrong taps cost <strong style="color:var(--red)">-'+pen+' pts</strong>!';
+  }
+}
+
+function tap(id,isReal,msg){
+  var el=document.getElementById(id);
+  if(!el||el.classList.contains('done')) return;
+  el.classList.add('done');
+  var pen=penMap[lv]||15;
+  if(isReal){
+    correct++; el.classList.add('correct'); score=Math.min(score+10,999);
+    addFeed('intel-list',msg,true); spawnPop(el,'+10');
+  } else {
+    wrong++; el.classList.add('wrong'); score=Math.max(0,score-pen);
+    addFeed('mines-list',msg,false); spawnPop(el,'-'+pen);
+  }
+  updScore();
+  var pct=Math.round(correct/TOTAL*100);
+  var f=document.getElementById('prog'); if(f) f.style.width=pct+'%';
+  var l=document.getElementById('prog-lbl'); if(l) l.textContent=correct+' / '+TOTAL;
+  if(correct>=TOTAL){
+    var n=document.getElementById('submit-note');
+    if(n){n.textContent='All intel found! Submit now.';n.style.color='var(--accent)';}
+  }
+}
+
+function addFeed(lid,msg,ok){
+  var list=document.getElementById(lid); if(!list) return;
+  var emp=list.querySelector('.feed-e'); if(emp) list.innerHTML='';
+  var d=document.createElement('div'); d.className='fi';
+  d.innerHTML='<span>'+(ok?'[+]':'[X]')+'</span><span class="'+(ok?'fi-ok':'fi-bad')+'">'+msg+'</span>';
+  list.appendChild(d);
+}
+
+function submitSweep(){
+  var realKws=['kw1','kw2','kw3','kw4','kw5','kw6','kw8','kw9'];
+  for(var i=0;i<realKws.length;i++){
+    var el=document.getElementById(realKws[i]);
+    if(el&&!el.classList.contains('done')) el.classList.add('missed');
+  }
+  var total=correct+wrong;
+  var acc=total>0?Math.round(correct/total*100):0;
+  var pass=acc>=(passMap[lv]||60);
+  var res=document.getElementById('sweep-res'); if(res) res.classList.add('on');
+  var pe=document.getElementById('sr-pct');
+  if(pe){pe.textContent=acc+'%';pe.style.color=pass?'var(--accent)':'var(--red)';}
+  var te=document.getElementById('sr-txt');
+  if(te){
+    if(pass) te.innerHTML='<strong>'+correct+'/'+TOTAL+' keywords found.</strong> Passed! Proceed to mission solve.';
+    else{
+      te.innerHTML='<strong>Below '+(passMap[lv]||60)+'% threshold.</strong> '+correct+'/'+TOTAL+' found. You can still proceed.';
+      var pb=document.getElementById('proceed-btn');
+      if(pb){pb.textContent='PROCEED ANYWAY';pb.style.background='var(--amber)';}
+    }
+  }
+  var sa=document.getElementById('submit-area'); if(sa) sa.style.display='none';
+  if(hardTimer) clearInterval(hardTimer);
+}
+
+function startTimer(){
+  var left=60;
+  var pill=document.getElementById('hpill-score');
+  hardTimer=setInterval(function(){
+    left--;
+    if(pill){pill.textContent=left+'s';pill.style.color=left<=10?'var(--red)':'var(--amber)';}
+    if(left<=0){clearInterval(hardTimer);submitSweep();}
+  },1000);
+}
+
+function goSolve(){ goScr('s2'); setPhase(1); }
+
+function unlk(id){
+  var step=document.getElementById(id);
+  if(!step||step.classList.contains('unlocked')) return;
+  step.classList.add('unlocked');
+  stepsUnlocked++; score=Math.min(score+15,999); updScore();
+  checkA(); checkB(); checkC();
+}
+
+function checkA(){
+  var done=['sa1','sa2','sa3'].every(function(id){
+    var el=document.getElementById(id);
+    return el&&el.classList.contains('unlocked');
+  });
+  if(done){
+    var a=document.getElementById('ans-a'); if(a) a.classList.add('on');
+    var b=document.getElementById('next-btn-a'); if(b) b.classList.add('on');
+  }
+}
+
+function checkB(){
+  var ob=document.getElementById('obj-b');
+  if(!ob||ob.style.display==='none') return;
+  var done=['sb1','sb2','sb2b','sb3'].every(function(id){
+    var el=document.getElementById(id);
+    return el&&el.classList.contains('unlocked');
+  });
+  if(done){
+    var a=document.getElementById('ans-b'); if(a) a.classList.add('on');
+    var b=document.getElementById('next-btn-b'); if(b) b.classList.add('on');
+  }
+}
+
+function checkC(){
+  var oc=document.getElementById('obj-c');
+  if(!oc||oc.style.display==='none') return;
+  var done=['sc1','sc2','sc3'].every(function(id){
+    var el=document.getElementById(id);
+    return el&&el.classList.contains('unlocked');
+  });
+  if(done){
+    var a=document.getElementById('ans-c'); if(a) a.classList.add('on');
+    var f=document.getElementById('finish-btn'); if(f) f.classList.add('on');
+  }
+}
+
+function showB(){
+  var ob=document.getElementById('obj-b');
+  if(ob){ ob.style.display='block'; setTimeout(function(){ ob.scrollIntoView({behavior:'smooth',block:'start'}); },80); }
+  var nb=document.getElementById('next-btn-a'); if(nb) nb.classList.remove('on');
+}
+
+function showC(){
+  var oc=document.getElementById('obj-c');
+  if(oc){ oc.style.display='block'; setTimeout(function(){ oc.scrollIntoView({behavior:'smooth',block:'start'}); },80); }
+  var nb=document.getElementById('next-btn-b'); if(nb) nb.classList.remove('on');
+}
+
+function goDebrief(){
+  goScr('s3'); setPhase(2);
+  var total=correct+wrong;
+  var acc=total>0?Math.round(correct/total*100):100;
+  var xp=Math.round(score*0.8+stepsUnlocked*10);
+  var coins=Math.floor(xp/5)+20;
+  var stars=score>=220?3:score>=160?2:1;
+  var sv=document.getElementById('db-score'); if(sv) sv.textContent=score;
+  var av=document.getElementById('db-acc'); if(av) av.textContent=acc+'%';
+  var xv=document.getElementById('db-xp'); if(xv) xv.textContent='+'+xp+' XP';
+  var cv=document.getElementById('db-coins'); if(cv) cv.textContent='+'+coins;
+  var sr=document.getElementById('db-stars');
+  if(sr){
+    sr.innerHTML='';
+    for(var i=0;i<3;i++){
+      var s=document.createElement('div'); s.className='db-star';
+      s.style.animationDelay=(i*0.15)+'s';
+      s.textContent=i<stars?'\u2B50':'\u2606';
+      sr.appendChild(s);
+    }
+  }
+  try{
+    var st=JSON.parse(localStorage.getItem('dw_state')||'{}');
+    st.xp=(st.xp||0)+xp; st.pts=(st.pts||0)+score;
+    localStorage.setItem('dw_state',JSON.stringify(st));
+    localStorage.setItem('dw_coins',parseInt(localStorage.getItem('dw_coins')||'0')+coins);
+  }catch(e){}
+  // Sync to server
+  try{
+    var tk=localStorage.getItem('dwolf_token');
+    if(tk){
+      fetch('/api/missions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({code:'MKG-017',stars:stars,score:score,xp_earned:xp})}).catch(function(){});
+    }
+  }catch(e){}
+}
+
+function goScr(id){
+  var all=document.querySelectorAll('.scr');
+  for(var i=0;i<all.length;i++) all[i].classList.remove('on');
+  var el=document.getElementById(id); if(el) el.classList.add('on');
+  if(window.scrollTo) window.scrollTo(0,0);
+}
+
+function setPhase(active){
+  ['ph0','ph1','ph2'].forEach(function(id,i){
+    var el=document.getElementById(id); if(!el) return;
+    el.className='ph'+(i<active?' done':i===active?' act':'');
+  });
+}
+
+function updScore(){
+  var sp=document.getElementById('hpill-score'); if(sp) sp.textContent=score+' PTS';
+  var sl=document.getElementById('score-lbl'); if(sl) sl.textContent=score+' PTS';
+}
+
+function spawnPop(el,txt){
+  if(!el) return;
+  var r=el.getBoundingClientRect();
+  var p=document.createElement('div'); p.className='pop-float';
+  p.style.color=txt.charAt(0)==='+' ? 'var(--accent)' : 'var(--red)';
+  p.style.left=(r.left+r.width/2-14)+'px';
+  p.style.top=(r.top-8)+'px';
+  p.textContent=txt;
+  document.body.appendChild(p);
+  setTimeout(function(){ if(p.parentNode) p.parentNode.removeChild(p); },1150);
+}
+</script>
+</body>
+</html>

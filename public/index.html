@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-WOLF · PSLE OPS · Mission Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080b06;--bg2:#0c100a;--bg3:#10150d;
+  --panel:#111509;--panel2:#161c0e;
+  --accent:#7cb518;--accent2:#9cd62a;--accent-l:rgba(124,181,24,.12);
+  --red:#e74c3c;--red-l:rgba(231,76,60,.12);
+  --amber:#f39c12;--amber-l:rgba(243,156,18,.12);
+  --blue:#3498db;--blue-l:rgba(52,152,219,.12);
+  --purple:#8b5cf6;--purple-l:rgba(139,92,246,.12);
+  --text:#c8d4a0;--text2:#7a8a5a;--text3:#3a4a2a;
+  --border:rgba(124,181,24,.14);--border2:rgba(124,181,24,.28);
+}
+html{background:var(--bg);min-height:100vh;color:var(--text);font-family:'Barlow Condensed',sans-serif}
+
+/* ── SCAN LINES ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(124,181,24,.015) 2px,rgba(124,181,24,.015) 4px);
+  pointer-events:none;z-index:1000
+}
+
+/* ── GLOBAL HEADER ── */
+.g-header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(8,11,6,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.g-header-inner{
+  max-width:1100px;margin:0 auto;padding:0 20px;
+  display:flex;align-items:center;gap:14px;height:52px;flex-wrap:wrap
+}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-delta{flex-shrink:0}
+.logo-text{font-size:1.3rem;font-weight:900;letter-spacing:3px;color:#fff}
+.logo-text em{font-style:normal;color:var(--accent)}
+.logo-sub{font-size:.6rem;color:var(--text2);font-family:'Share Tech Mono';letter-spacing:1px;margin-top:-2px}
+.header-sep{width:1px;height:20px;background:var(--border2);flex-shrink:0}
+
+/* Operative info */
+.op-wrap{display:flex;align-items:center;gap:10px}
+.op-avatar{
+  width:32px;height:32px;
+  clip-path:polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%);
+  background:linear-gradient(135deg,var(--panel2),var(--accent-l));
+  border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;flex-shrink:0
+}
+.op-name{font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.5px}
+.op-rank{font-size:.58rem;color:var(--accent);font-family:'Share Tech Mono';letter-spacing:.5px}
+
+/* HUD pills */
+.hud-pills{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.hpill{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border:1px solid var(--border2);
+  background:var(--panel);font-family:'Share Tech Mono';
+  font-size:.74rem;font-weight:700;flex-shrink:0
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink .9s infinite ease-in-out}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* ── HERO BANNER ── */
+.hero{
+  background:linear-gradient(135deg,#060b04,#0e1a08,#060b04);
+  border-bottom:1px solid var(--border);padding:32px 20px;
+  position:relative;overflow:hidden
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(124,181,24,.06) 0%,transparent 60%);
+  pointer-events:none
+}
+.hero-inner{max-width:1100px;margin:0 auto;position:relative;z-index:2;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.hero-wolf{
+  font-size:4rem;line-height:1;flex-shrink:0;
+  filter:drop-shadow(0 0 20px rgba(124,181,24,.3));
+  animation:wolfbob 3s ease-in-out infinite
+}
+@keyframes wolfbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.hero-text{flex:1;min-width:200px}
+.hero-codename{font-size:.62rem;font-weight:700;letter-spacing:2px;color:var(--accent);font-family:'Share Tech Mono';margin-bottom:6px}
+.hero-title{font-size:1.8rem;font-weight:900;color:#fff;letter-spacing:1px;line-height:1.15;margin-bottom:6px}
+.hero-title span{color:var(--accent)}
+.hero-desc{font-size:.8rem;color:var(--text2);line-height:1.6;max-width:480px}
+
+/* XP progress */
+.hero-xp{flex-shrink:0;min-width:200px}
+.xp-card{background:var(--panel);border:1px solid var(--border2);padding:14px 16px;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.xp-top{display:flex;justify-content:space-between;margin-bottom:5px}
+.xp-rank-label{font-size:.65rem;font-weight:700;color:var(--accent);font-family:'Share Tech Mono';letter-spacing:.5px}
+.xp-num{font-size:.65rem;color:var(--text2);font-family:'Share Tech Mono'}
+.xp-bar-outer{height:6px;background:rgba(255,255,255,.07);margin-bottom:6px}
+.xp-bar-fill{height:6px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s;position:relative}
+.xp-bar-fill::after{content:'';position:absolute;right:0;top:-2px;width:2px;height:10px;background:var(--accent2)}
+.xp-bottom{display:flex;justify-content:space-between;font-size:.62rem;color:var(--text2);font-family:'Share Tech Mono'}
+
+/* Streak row */
+.streak-row{display:flex;gap:4px;margin-top:10px}
+.streak-day{
+  flex:1;height:4px;border-radius:0;
+  background:rgba(255,255,255,.07);
+  transition:background .3s
+}
+.streak-day.done{background:var(--accent)}
+.streak-day.today{background:var(--amber)}
+
+/* ── MAIN CONTENT ── */
+.main{max-width:1100px;margin:0 auto;padding:20px 20px 60px;display:grid;grid-template-columns:1fr 240px;gap:20px}
+@media(max-width:780px){.main{grid-template-columns:1fr}}
+
+/* ── MISSION BOARD ── */
+.board-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.board-title{font-size:.65rem;font-weight:700;letter-spacing:2px;color:var(--accent);font-family:'Share Tech Mono';text-transform:uppercase}
+.board-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
+.board-filter{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{
+  padding:5px 12px;font-size:.65rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);
+  font-family:'Share Tech Mono';transition:all .2s
+}
+.filter-btn:hover{color:var(--text);border-color:var(--border2)}
+.filter-btn.act{color:var(--accent);border-color:rgba(124,181,24,.4);background:var(--accent-l)}
+
+/* Mission card */
+.mc{
+  background:var(--panel);border:1px solid var(--border);
+  display:flex;align-items:stretch;margin-bottom:6px;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;position:relative;overflow:hidden
+}
+.mc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--mc-col,transparent);opacity:0;transition:opacity .2s}
+.mc:hover:not(.locked){background:var(--panel2);border-color:var(--border2);transform:translateX(4px)}
+.mc:hover:not(.locked)::before{opacity:1}
+.mc.done{--mc-col:var(--accent)}.mc.done::before{opacity:1}
+.mc.active{--mc-col:var(--amber);border-color:rgba(243,156,18,.25);background:rgba(243,156,18,.04)}.mc.active::before{opacity:1}
+.mc.locked{opacity:.3;cursor:not-allowed}
+
+/* mission icon */
+.mc-icon{
+  width:56px;flex-shrink:0;background:var(--bg3);border-right:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center
+}
+.mc-icon svg{width:28px;height:28px}
+
+/* mission body */
+.mc-body{flex:1;padding:10px 14px;min-width:0}
+.mc-top{display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap}
+.mc-code{font-size:.58rem;color:var(--text2);letter-spacing:1.5px;font-family:'Share Tech Mono'}
+.mc-name{font-size:.88rem;font-weight:800;color:#fff;letter-spacing:.3px}
+.mc-sub{font-size:.68rem;color:var(--text2);margin-bottom:6px;line-height:1.4}
+.mc-tags{display:flex;gap:5px;flex-wrap:wrap}
+.mc-tag{font-size:.58rem;font-weight:700;padding:2px 7px;letter-spacing:.4px;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px))}
+.tag-topic{background:var(--blue-l);color:var(--blue);border:1px solid rgba(52,152,219,.3)}
+.tag-diff-easy{background:var(--accent-l);color:var(--accent);border:1px solid rgba(124,181,24,.3)}
+.tag-diff-med{background:var(--amber-l);color:var(--amber);border:1px solid rgba(243,156,18,.3)}
+.tag-diff-hard{background:var(--red-l);color:var(--red);border:1px solid rgba(231,76,60,.3)}
+
+/* mission right */
+.mc-right{
+  padding:10px 14px;border-left:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;
+  min-width:110px;flex-shrink:0
+}
+.mc-badge{font-size:.58rem;font-weight:700;padding:2px 8px;text-transform:uppercase;letter-spacing:.5px;clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px))}
+.badge-done{background:var(--accent-l);color:var(--accent);border:1px solid rgba(124,181,24,.3)}
+.badge-active{background:var(--amber-l);color:var(--amber);border:1px solid rgba(243,156,18,.3);animation:pulse .9s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.7}to{opacity:1}}
+.badge-locked{background:rgba(255,255,255,.03);color:var(--text3);border:1px solid var(--border)}
+.badge-new{background:var(--purple-l);color:var(--purple);border:1px solid rgba(139,92,246,.3)}
+.mc-stars{display:flex;gap:2px}
+.mc-xp{font-size:.62rem;color:var(--amber);font-weight:700;font-family:'Share Tech Mono'}
+.mc-score{font-size:.62rem;color:var(--text2);font-family:'Share Tech Mono'}
+
+/* progress bar in mission */
+.mc-prog{height:2px;background:rgba(255,255,255,.06);margin-top:6px}
+.mc-prog-fill{height:2px;background:var(--mc-col,var(--accent));transition:width .8s}
+
+/* BOSS card */
+.boss-card{
+  background:linear-gradient(135deg,#0c0518,#160a28,#0c0518);
+  border:1px solid rgba(139,92,246,.3);padding:16px;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  cursor:pointer;transition:all .2s;margin-bottom:6px;position:relative;overflow:hidden
+}
+.boss-card:hover{border-color:rgba(139,92,246,.5);transform:translateX(4px)}
+.boss-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--purple)}
+.boss-inner{display:flex;align-items:center;gap:14px}
+.boss-icon{font-size:2.5rem;flex-shrink:0;animation:bossbob 2s ease-in-out infinite}
+@keyframes bossbob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.04)}}
+.boss-info{flex:1}
+.boss-tag{font-size:.58rem;font-weight:700;letter-spacing:2px;color:var(--purple);font-family:'Share Tech Mono';text-transform:uppercase;margin-bottom:3px}
+.boss-name{font-size:.9rem;font-weight:800;color:#e9d5ff;letter-spacing:.3px;margin-bottom:3px}
+.boss-desc{font-size:.68rem;color:#c4b5fd;line-height:1.4;margin-bottom:8px}
+.boss-hp-lbl{display:flex;justify-content:space-between;font-size:.6rem;font-weight:700;font-family:'Share Tech Mono';margin-bottom:3px}
+.boss-hp-lbl span:first-child{color:var(--amber)}
+.boss-hp-lbl span:last-child{color:var(--text2)}
+.boss-hp-bar{height:5px;background:rgba(255,255,255,.07)}
+.boss-hp-fill{height:5px;background:linear-gradient(90deg,var(--purple),#a855f7);width:72%;transition:width 1.5s}
+
+/* ── SIDEBAR ── */
+.sidebar{display:flex;flex-direction:column;gap:12px}
+.sc{background:var(--panel);border:1px solid var(--border);padding:14px;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
+.sc-title{font-size:.58rem;font-weight:700;letter-spacing:1.5px;color:var(--accent);font-family:'Share Tech Mono';text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:10px}
+.sc-title.amber{color:var(--amber)}
+.sc-title.red{color:var(--red)}
+
+/* Squad rank */
+.lb-row{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid var(--border)}
+.lb-row:last-child{border-bottom:none}
+.lb-pos{width:16px;font-size:.65rem;font-weight:700;font-family:'Share Tech Mono';color:var(--text2)}
+.lb-pos.g{color:var(--amber)}.lb-pos.s{color:#94a3b8}.lb-pos.b{color:var(--amber)}
+.lb-av{width:20px;height:20px;clip-path:polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%);background:var(--panel2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0}
+.lb-name{flex:1;font-size:.7rem;font-weight:700;color:var(--text)}
+.lb-pts{font-size:.65rem;font-weight:700;color:var(--accent);font-family:'Share Tech Mono'}
+.lb-you{background:var(--accent-l);padding:2px 4px;border-radius:0}
+
+/* Daily ops */
+.daily-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px}
+.d-day{
+  aspect-ratio:1;border:1px solid var(--border);background:var(--bg3);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:.55rem;font-weight:700;gap:1px;transition:all .2s
+}
+.d-day span{font-size:.46rem;color:var(--text3);font-family:'Share Tech Mono'}
+.d-day.done{background:rgba(124,181,24,.1);border-color:rgba(124,181,24,.3);color:var(--accent)}
+.d-day.today{background:var(--red-l);border-color:rgba(231,76,60,.4);animation:pulse .9s ease-in-out infinite alternate;cursor:pointer}
+.d-day.off{opacity:.2}
+
+/* Achievements */
+.ach-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.ach{
+  aspect-ratio:1;border:1px solid var(--border);background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;
+  clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px));
+  cursor:pointer;transition:transform .15s;position:relative
+}
+.ach:hover:not(.off){transform:scale(1.1)}
+.ach.off{filter:grayscale(1) brightness(.28);cursor:default}
+.ach.new-a::after{content:'';position:absolute;top:-2px;right:-2px;width:7px;height:7px;border-radius:50%;background:var(--red)}
+
+/* Quick ops */
+.quick-ops{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qop{
+  background:var(--panel);border:1px solid var(--border);padding:10px 8px;
+  cursor:pointer;text-align:center;transition:all .2s;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))
+}
+.qop:hover{background:var(--panel2);border-color:var(--border2);transform:translateY(-2px)}
+.qop svg{display:block;margin:0 auto 5px;width:22px;height:22px}
+.qop-lbl{font-size:.62rem;font-weight:700;color:var(--text2);letter-spacing:.3px;text-transform:uppercase}
+
+/* ── FLOATING POPS ── */
+.pop{position:fixed;font-family:'Share Tech Mono';font-size:.8rem;font-weight:800;pointer-events:none;animation:popf 1.2s ease-out forwards;z-index:999;white-space:nowrap}
+.pop.xp{color:var(--amber)}
+@keyframes popf{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(1.2)}}
+
+/* Decorative corner brackets on page */
+.page-corners{pointer-events:none;position:fixed;inset:0;z-index:50}
+.page-corner{position:absolute;width:20px;height:20px;border-color:var(--accent);border-style:solid;opacity:.25}
+.pc-tl{top:8px;left:8px;border-width:1.5px 0 0 1.5px}
+.pc-tr{top:8px;right:8px;border-width:1.5px 1.5px 0 0}
+.pc-bl{bottom:8px;left:8px;border-width:0 0 1.5px 1.5px}
+.pc-br{bottom:8px;right:8px;border-width:0 1.5px 1.5px 0}
+
+/* Modal overlay */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--panel);border:1px solid var(--border2);
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  padding:24px;max-width:400px;width:100%;animation:modalin .25s ease-out
+}
+@keyframes modalin{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-size:1rem;font-weight:800;color:#fff;letter-spacing:.5px;margin-bottom:5px}
+.modal-sub{font-size:.72rem;color:var(--text2);line-height:1.5;margin-bottom:16px}
+.modal-pin-row{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.modal-pin-in{
+  background:var(--bg3);border:1px solid var(--border2);color:var(--accent);
+  font-family:'Share Tech Mono';font-size:1rem;padding:8px 14px;
+  width:90px;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s
+}
+.modal-pin-in:focus{border-color:var(--accent)}
+.modal-btn{
+  background:var(--accent);color:#000;font-weight:800;font-size:.8rem;
+  padding:9px 18px;border:none;cursor:pointer;letter-spacing:1px;text-transform:uppercase;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+  transition:all .15s;display:flex;align-items:center;gap:6px
+}
+.modal-btn:hover{background:var(--accent2)}
+.modal-cancel{background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:.75rem;font-weight:700;padding:9px 14px;cursor:pointer;letter-spacing:.5px;text-transform:uppercase}
+.modal-err{font-size:.63rem;color:var(--red);font-family:'Share Tech Mono';display:none;margin-top:-10px;margin-bottom:8px}
+.modal-level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.modal-lv{
+  background:var(--bg3);border:1px solid var(--border);padding:10px 8px;
+  text-align:center;cursor:pointer;transition:all .2s;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))
+}
+.modal-lv:hover{border-color:var(--border2)}
+.modal-lv.sel{background:rgba(124,181,24,.06)}
+.modal-lv-icon{font-size:1.4rem;display:block;margin-bottom:4px}
+.modal-lv-name{font-size:.78rem;font-weight:800;color:#fff}
+.modal-lv-pass{font-size:.58rem;font-family:'Share Tech Mono';margin-top:2px}
+
+/* responsiveness */
+@media(max-width:600px){
+  .hero-inner{flex-direction:column;text-align:center}
+  .hero-xp{width:100%}
+  .hud-pills{display:none}
+}
+
+/* ── LOGIN MODAL ── */
+.login-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(4,6,3,.96);
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);
+}
+.login-overlay.hidden{display:none}
+.login-box{
+  width:92%;max-width:380px;
+  background:var(--panel);border:1px solid var(--border2);
+  padding:32px 28px;position:relative;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+}
+.login-wolf{text-align:center;font-size:3.6rem;margin-bottom:10px;filter:drop-shadow(0 0 18px rgba(124,181,24,.35));animation:wolfbob 3s ease-in-out infinite}
+.login-eye{text-align:center;font-size:.58rem;font-weight:800;letter-spacing:3px;color:var(--accent);font-family:'Share Tech Mono';text-transform:uppercase;margin-bottom:6px}
+.login-title{text-align:center;font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:4px}
+.login-sub{text-align:center;font-size:.78rem;color:var(--text2);margin-bottom:22px}
+.login-tabs{display:flex;gap:0;margin-bottom:18px;border:1px solid var(--border)}
+.login-tab{flex:1;padding:9px;text-align:center;font-size:.78rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;background:transparent;color:var(--text2);border:none;font-family:'Barlow Condensed',sans-serif;transition:all .15s}
+.login-tab.active{background:var(--accent-l);color:var(--accent);border-bottom:2px solid var(--accent)}
+.login-field{margin-bottom:12px}
+.login-field label{display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;color:var(--text2);font-family:'Share Tech Mono';text-transform:uppercase;margin-bottom:5px}
+.login-field input{
+  width:100%;padding:10px 12px;
+  background:var(--bg);border:1px solid var(--border2);color:#fff;
+  font-size:.92rem;font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;letter-spacing:.5px;border-radius:2px;
+  outline:none;transition:border-color .15s;
+}
+.login-field input:focus{border-color:var(--accent)}
+.login-field input::placeholder{color:var(--text3)}
+.login-btn{
+  width:100%;padding:12px;margin-top:6px;
+  background:var(--accent);color:#000;
+  font-size:.88rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;border:none;border-radius:2px;
+  font-family:'Barlow Condensed',sans-serif;transition:all .15s;
+}
+.login-btn:hover{background:var(--accent2);transform:scale(1.01)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.login-err{
+  display:none;text-align:center;margin-top:10px;
+  font-size:.76rem;color:var(--red);font-weight:700;
+  padding:8px;background:var(--red-l);border:1px solid rgba(231,76,60,.2);
+}
+.login-err.show{display:block}
+.logout-btn{
+  padding:4px 10px;font-size:.62rem;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;border:1px solid var(--border2);
+  background:transparent;color:var(--text2);font-family:'Share Tech Mono';
+  border-radius:2px;transition:all .15s;margin-left:6px;
+}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN MODAL ── -->
+<div id="login-overlay" class="login-overlay hidden">
+  <div class="login-box">
+    <div class="login-wolf">&#128058;</div>
+    <div class="login-eye">OPERATOR AUTHENTICATION</div>
+    <div class="login-title">D-WOLF OPS</div>
+    <div class="login-sub">Enter your callsign and PIN to access the mission board</div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">LOGIN</button>
+      <button class="login-tab" id="tab-register" onclick="switchLoginTab('register')">NEW OPERATOR</button>
+    </div>
+    <div class="login-field">
+      <label>CALLSIGN (NAME)</label>
+      <input type="text" id="login-name" placeholder="Enter your name" maxlength="20" autocomplete="off">
+    </div>
+    <div class="login-field">
+      <label>4-DIGIT PIN</label>
+      <input type="password" id="login-pin" placeholder="0000" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+    </div>
+    <button class="login-btn" id="login-submit" onclick="submitLogin()">LOGIN</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- Page corner brackets -->
+<div class="page-corners">
+  <div class="page-corner pc-tl"></div>
+  <div class="page-corner pc-tr"></div>
+  <div class="page-corner pc-bl"></div>
+  <div class="page-corner pc-br"></div>
+</div>
+
+<!-- ── GLOBAL HEADER ── -->
+<header class="g-header">
+  <div class="g-header-inner">
+    <div class="logo">
+      <svg class="logo-delta" width="24" height="24" viewBox="0 0 24 24">
+        <polygon points="12,3 22,21 2,21" fill="none" stroke="#7cb518" stroke-width="1.5"/>
+        <polygon points="12,8 18,19 6,19" fill="#7cb518" opacity=".25"/>
+      </svg>
+      <div>
+        <div class="logo-text"><em>D</em>-WOLF</div>
+        <div class="logo-sub">PSLE OPS · MATHS KINGDOM</div>
+      </div>
+    </div>
+    <div class="header-sep"></div>
+    <div class="op-wrap">
+      <div class="op-avatar">🎖️</div>
+      <div>
+        <div class="op-name" id="hdr-name">MEI JUN</div>
+        <div class="op-rank" id="hdr-rank">SHADOW CUB · LV.12</div>
+      </div>
+    </div>
+    <div class="hud-pills">
+      <div class="hpill" style="color:var(--amber)">
+        <svg width="11" height="11" viewBox="0 0 11 11"><polygon points="5.5,1 10,4 10,8.5 5.5,11 1,8.5 1,4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        <span id="hdr-xp">0 XP</span>
+      </div>
+      <div class="hpill" style="color:var(--accent)">
+        <svg width="11" height="11" viewBox="0 0 11 11"><polygon points="5.5,1 9.5,4 8,9.5 3,9.5 1.5,4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        <span id="hdr-pts">100 PTS</span>
+      </div>
+      <div class="hpill" style="color:var(--red)">
+        <svg width="9" height="11" viewBox="0 0 9 11"><path d="M4.5 1Q5.5 3 4.5 5Q6 3.5 5.5 6Q7 5 6.5 8Q5.5 10 4.5 10Q3.5 10 2.5 8Q2 5 3.5 6Q3 3.5 4.5 5Q3.5 3 4.5 1Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        <span id="hdr-streak">7d</span>
+      </div>
+      <div class="hpill"><span class="live-dot"></span><span style="color:var(--text2)">ONLINE</span></div>
+      <button class="logout-btn" onclick="logoutUser()">LOGOUT</button>
+    </div>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-wolf">🐺</div>
+    <div class="hero-text">
+      <div class="hero-codename">// OPERATIVE BRIEFING · MATHS KINGDOM //</div>
+      <h1 class="hero-title">Welcome back, <span id="hero-name">Sean</span>.<br>Your missions await.</h1>
+      <p class="hero-desc" id="hero-desc">You're <strong style="color:var(--amber)">380 XP</strong> away from <strong style="color:#c4b5fd">Master Mathematician</strong> rank. Percentage Peak needs defending — that's your priority target.</p>
+    </div>
+    <div class="hero-xp">
+      <div class="xp-card">
+        <div class="xp-top">
+          <span class="xp-rank-label" id="xp-rank-lbl">EXPLORER RANK</span>
+          <span class="xp-num" id="xp-num-lbl">620 / 1000 XP</span>
+        </div>
+        <div class="xp-bar-outer"><div class="xp-bar-fill" id="xp-bar" style="width:62%"></div></div>
+        <div class="xp-bottom">
+          <span>🔥 <span id="streak-count">7</span>-day streak</span>
+          <span id="xp-to-next">380 to next rank</span>
+        </div>
+        <div class="streak-row" id="streak-row"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- LEFT: MISSION BOARD -->
+  <div>
+    <div class="board-header">
+      <div class="board-title">// MISSION BOARD — MATHS KINGDOM</div>
+      <div class="board-line"></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="board-filter">
+      <button class="filter-btn act" onclick="filterMissions('all',this)">ALL</button>
+      <button class="filter-btn" onclick="filterMissions('active',this)">ACTIVE</button>
+      <button class="filter-btn" onclick="filterMissions('done',this)">CLEARED</button>
+      <button class="filter-btn" onclick="filterMissions('locked',this)">LOCKED</button>
+    </div>
+
+    <!-- MISSIONS rendered by JS -->
+    <div id="mission-list"></div>
+
+    <!-- BOSS / FINAL OBJ -->
+    <div class="boss-card" onclick="openMission('boss')">
+      <div class="boss-inner">
+        <div class="boss-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52">
+            <polygon points="26,4 48,16 48,36 26,48 4,36 4,16" fill="none" stroke="#f39c12" stroke-width="1.5"/>
+            <polygon points="26,10 42,19 42,33 26,42 10,33 10,19" fill="none" stroke="#e74c3c" stroke-width="1"/>
+            <circle cx="26" cy="26" r="6" fill="none" stroke="#f39c12" stroke-width="1.5"/>
+            <line x1="26" y1="4" x2="26" y2="11" stroke="#f39c12" stroke-width="1.5"/>
+            <line x1="26" y1="41" x2="26" y2="48" stroke="#f39c12" stroke-width="1.5"/>
+            <line x1="4" y1="26" x2="11" y2="26" stroke="#f39c12" stroke-width="1.5"/>
+            <line x1="41" y1="26" x2="48" y2="26" stroke="#f39c12" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="boss-info">
+          <div class="boss-tag">⚠ PRIORITY TARGET · FINAL OBJECTIVE</div>
+          <div class="boss-name">TARGET: PSLE 2026 EXAM BOSS · CODENAME "PAPER DAY"</div>
+          <div class="boss-desc">The final target. Complete all missions to weaken it. Vulnerability: <strong style="color:#fca5a5">Percentage Peak at 45%</strong> — patch before the assault. Reward: Wolf Alpha rank + 500 XP.</div>
+          <div class="boss-hp-lbl"><span>TARGET HP: <span id="boss-hp-txt">72%</span></span><span>COMPLETE MISSIONS TO WEAKEN</span></div>
+          <div class="boss-hp-bar"><div class="boss-hp-fill" id="boss-hp-fill"></div></div>
+        </div>
+        <div style="flex-shrink:0;padding-left:10px">
+          <div style="font-size:.62rem;font-weight:700;color:var(--amber);font-family:'Share Tech Mono';text-align:right;margin-bottom:4px">🏆 REWARD</div>
+          <div style="font-size:.7rem;color:#c4b5fd;font-family:'Share Tech Mono';text-align:right">+500 XP<br>Wolf Alpha</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Quick ops -->
+    <div class="sc">
+      <div class="sc-title">// QUICK OPS</div>
+      <div class="quick-ops">
+        <div class="qop" onclick="document.getElementById('pin-modal').classList.add('show')">
+          <svg viewBox="0 0 22 22" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round">
+            <rect x="2" y="10" width="18" height="10" rx="2"/><path d="M6 10V7A5 5 0 0116 7v3"/><circle cx="11" cy="15" r="1.5" fill="var(--accent)"/>
+          </svg>
+          <div class="qop-lbl">Set level</div>
+        </div>
+        <div class="qop" onclick="alert('Upload scan — connect camera or file picker here')">
+          <svg viewBox="0 0 22 22" fill="none" stroke="var(--text2)" stroke-width="1.5" stroke-linecap="round">
+            <rect x="3" y="3" width="16" height="16" rx="2"/><circle cx="11" cy="11" r="4"/><circle cx="15.5" cy="6.5" r="1.2" fill="var(--text2)"/>
+          </svg>
+          <div class="qop-lbl">Scan paper</div>
+        </div>
+        <div class="qop" onclick="alert('Leaderboard coming in Phase 2!')">
+          <svg viewBox="0 0 22 22" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round">
+            <path d="M11 3L13.5 8.5H19L14.5 12L16.5 18L11 14.5L5.5 18L7.5 12L3 8.5H8.5Z"/>
+          </svg>
+          <div class="qop-lbl" style="color:var(--amber)">Leaderboard</div>
+        </div>
+        <div class="qop" onclick="sendReport()">
+          <svg viewBox="0 0 22 22" fill="none" stroke="var(--text2)" stroke-width="1.5" stroke-linecap="round">
+            <polygon points="11,2 20,18 2,18"/><line x1="7" y1="14" x2="15" y2="14"/><line x1="9" y1="18" x2="11" y2="14"/><line x1="13" y1="18" x2="11" y2="14"/>
+          </svg>
+          <div class="qop-lbl">Transmit HQ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Op -->
+    <div class="sc" style="border-left:3px solid var(--blue)">
+      <div class="sc-title" style="color:var(--blue)">// SCAN OP &bull; AI TUTOR</div>
+      <a href="dwolf_scan.html" style="text-decoration:none">
+        <div style="background:linear-gradient(135deg,rgba(56,189,248,.08),rgba(56,189,248,.04));border:1px solid rgba(56,189,248,.3);padding:12px;border-radius:2px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(56,189,248,.12)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(56,189,248,.08),rgba(56,189,248,.04))'">
+          <div style="font-size:2rem;flex-shrink:0">&#x1F4F7;</div>
+          <div>
+            <div style="font-size:.82rem;font-weight:900;color:#fff;margin-bottom:3px">Scan Your Exam Paper</div>
+            <div style="font-size:.68rem;color:var(--text2);line-height:1.4">Take a photo &bull; AI finds errors &bull; Bar model fix shown</div>
+          </div>
+          <div style="font-size:.6rem;font-weight:800;font-family:var(--ffm);padding:3px 8px;background:var(--bl);color:var(--blue);border:1px solid rgba(56,189,248,.3);flex-shrink:0">AI</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Daily ops -->
+    <div class="sc">
+      <div class="sc-title amber">// DAILY OPS</div>
+      <div class="daily-grid">
+        <div class="d-day done"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 3.5,7.5 8.5,2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>MON</span></div>
+        <div class="d-day done"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 3.5,7.5 8.5,2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>TUE</span></div>
+        <div class="d-day done"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 3.5,7.5 8.5,2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>WED</span></div>
+        <div class="d-day today" onclick="claimDaily()">
+          <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1" y="4" width="8" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M3 4L3 2.5Q3 1 5 1Q7 1 7 2.5L7 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+          <span>THU</span>
+        </div>
+        <div class="d-day off"><span>FRI</span></div>
+        <div class="d-day off"><span>SAT</span></div>
+        <div class="d-day off"><span>SUN</span></div>
+      </div>
+      <div style="font-size:.58rem;color:var(--red);font-weight:700;text-align:center;font-family:'Share Tech Mono';letter-spacing:.5px">TAP THU TO CLAIM INTEL DROP</div>
+    </div>
+
+    <!-- Squad rank -->
+    <div class="sc">
+      <div class="sc-title">// SQUAD RANK</div>
+      <div class="lb-row">
+        <div class="lb-pos g">1</div>
+        <div class="lb-av">
+          <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,4 11,9 6,12 1,9 1,4" fill="none" stroke="#f39c12" stroke-width="1.2"/><circle cx="6" cy="6" r="2" fill="#f39c12" opacity=".6"/></svg>
+        </div>
+        <div class="lb-name">Xiao Ming</div>
+        <div class="lb-pts">1240</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos s">2</div>
+        <div class="lb-av">
+          <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,4 11,9 6,12 1,9 1,4" fill="none" stroke="#94a3b8" stroke-width="1.2"/><circle cx="6" cy="6" r="2" fill="#94a3b8" opacity=".6"/></svg>
+        </div>
+        <div class="lb-name">Priya</div>
+        <div class="lb-pts">980</div>
+      </div>
+      <div class="lb-row lb-you">
+        <div class="lb-pos b">3</div>
+        <div class="lb-av">
+          <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,4 11,9 6,12 1,9 1,4" fill="none" stroke="#7cb518" stroke-width="1.5"/><circle cx="6" cy="6" r="2" fill="#7cb518" opacity=".7"/></svg>
+        </div>
+        <div class="lb-name" style="color:var(--accent)">YOU</div>
+        <div class="lb-pts" id="lb-your-pts">820</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos" style="color:var(--text3)">4</div>
+        <div class="lb-av">
+          <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 11,4 11,9 6,12 1,9 1,4" fill="none" stroke="#3a4a2a" stroke-width="1.2"/></svg>
+        </div>
+        <div class="lb-name">Ali</div>
+        <div class="lb-pts">760</div>
+      </div>
+      <div style="font-size:.58rem;color:var(--text2);margin-top:7px;text-align:center;font-family:'Share Tech Mono'">160 PTS TO RANK #2</div>
+    </div>
+
+    <!-- Medals -->
+    <div class="sc">
+      <div class="sc-title">// WOLF MEDALS</div>
+      <div class="ach-grid">
+        <div class="ach" title="Fractions cleared">
+          <svg width="22" height="22" viewBox="0 0 22 22"><polygon points="11,3 19,18 3,18" fill="none" stroke="#7cb518" stroke-width="1.5"/><line x1="11" y1="8" x2="11" y2="13" stroke="#7cb518" stroke-width="1.5"/><line x1="8.5" y1="10.5" x2="13.5" y2="10.5" stroke="#7cb518" stroke-width="1.5"/></svg>
+        </div>
+        <div class="ach" title="7-day streak">
+          <svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 3Q14 6 12 10Q16 7 15 12Q17 10 16 14Q14 19 11 19Q8 19 6 14Q5 10 7 12Q6 7 10 10Q8 6 11 3Z" fill="none" stroke="#d4870a" stroke-width="1.5"/></svg>
+        </div>
+        <div class="ach new-a" title="New: algebra unlocked">
+          <svg width="22" height="22" viewBox="0 0 22 22"><path d="M5 17L10 5M17 17L12 5M7 12L15 12" fill="none" stroke="#d4870a" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="ach" title="Speed drill">
+          <svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="8" fill="none" stroke="#3498db" stroke-width="1.5"/><circle cx="11" cy="11" r="3" fill="none" stroke="#3498db" stroke-width="1"/><circle cx="11" cy="11" r="1" fill="#3498db"/><line x1="11" y1="3" x2="11" y2="6" stroke="#3498db" stroke-width="1.5"/><line x1="11" y1="16" x2="11" y2="19" stroke="#3498db" stroke-width="1.5"/><line x1="3" y1="11" x2="6" y2="11" stroke="#3498db" stroke-width="1.5"/><line x1="16" y1="11" x2="19" y2="11" stroke="#3498db" stroke-width="1.5"/></svg>
+        </div>
+        <div class="ach off"><svg width="22" height="22" viewBox="0 0 22 22"><rect x="5" y="11" width="12" height="8" rx="1.5" fill="none" stroke="#3a4a2a" stroke-width="1.2"/><path d="M8 11V8.5Q8 5 11 5Q14 5 14 8.5V11" fill="none" stroke="#3a4a2a" stroke-width="1.2"/><circle cx="11" cy="15" r="1.5" fill="#3a4a2a"/></svg></div>
+        <div class="ach off"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2L14 8.5H20L15 12L17 19L11 15L5 19L7 12L2 8.5H8Z" fill="none" stroke="#3a4a2a" stroke-width="1.2"/></svg></div>
+        <div class="ach off"><svg width="22" height="22" viewBox="0 0 22 22"><polygon points="11,2 20,8 17,19 5,19 2,8" fill="none" stroke="#3a4a2a" stroke-width="1.2"/></svg></div>
+        <div class="ach off"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 3Q14 5 11 8Q15 6 14 10Q17 9 16 13Q14 19 11 19Q8 19 6 13Q5 9 8 10Q7 6 11 8Q8 5 11 3Z" fill="none" stroke="#3a4a2a" stroke-width="1.2"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── PARENT PIN MODAL ── -->
+<div class="modal-overlay" id="pin-modal" onclick="if(event.target===this)closePinModal()">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="8" width="12" height="7" rx="1.5" stroke="#8b5cf6" stroke-width="1.2"/><path d="M4 8V6Q4 2 8 2Q12 2 12 6V8" stroke="#8b5cf6" stroke-width="1.2"/><circle cx="8" cy="11.5" r="1.5" fill="#8b5cf6"/></svg>
+      <div class="modal-title">Parent Command — Set Level</div>
+    </div>
+    <div class="modal-sub">Select operative difficulty, enter parent PIN to activate. Kids cannot change this without PIN.</div>
+
+    <div class="modal-level-grid">
+      <div class="modal-lv sel" id="mlv-easy" onclick="selectModalLevel('easy')" style="border-color:var(--accent)">
+        <span class="modal-lv-icon">🟢</span>
+        <div class="modal-lv-name" style="color:var(--accent)">EASY</div>
+        <div class="modal-lv-pass" style="color:var(--accent)">60% pass</div>
+      </div>
+      <div class="modal-lv" id="mlv-medium" onclick="selectModalLevel('medium')" style="--lc:var(--amber)">
+        <span class="modal-lv-icon">🟡</span>
+        <div class="modal-lv-name" style="color:var(--amber)">MEDIUM</div>
+        <div class="modal-lv-pass" style="color:var(--amber)">75% pass</div>
+      </div>
+      <div class="modal-lv" id="mlv-hard" onclick="selectModalLevel('hard')">
+        <span class="modal-lv-icon">🔴</span>
+        <div class="modal-lv-name" style="color:var(--red)">HARD</div>
+        <div class="modal-lv-pass" style="color:var(--red)">90% pass</div>
+      </div>
+    </div>
+
+    <div class="modal-pin-row">
+      <span style="font-size:.65rem;color:var(--text2);font-family:'Share Tech Mono';flex-shrink:0">PIN:</span>
+      <input class="modal-pin-in" type="password" id="modal-pin" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter')confirmModalPin()">
+      <button class="modal-btn" onclick="confirmModalPin()">
+        <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="2,2 8,5 2,8" fill="#000"/></svg>
+        CONFIRM
+      </button>
+      <button class="modal-cancel" onclick="closePinModal()">CANCEL</button>
+    </div>
+    <div class="modal-err" id="modal-err">⚠ Wrong PIN — demo PIN: 1234</div>
+    <div style="font-size:.58rem;color:var(--text3);font-family:'Share Tech Mono'">Demo PIN: 1234</div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════
+   MISSION DATA
+══════════════════════════════ */
+const MISSIONS = [
+  {
+    id:'mkg-001', code:'MKG-001', name:'Fractions Forest',
+    desc:'Unit method · ratio fractions · simplify · florist operation',
+    topic:'Fractions', icon:'fractions', status:'done',
+    stars:3, xp:120, score:85, file:'dwolf_coming_soon.html',
+    tags:['Fractions','P6 Prelim','★★☆']
+  },
+  {
+    id:'mkg-002', code:'MKG-002', name:'Ratio River',
+    desc:'3-part ratio · percentage changes · vehicle count operation',
+    topic:'Ratio', icon:'ratio', status:'done',
+    stars:2, xp:100, score:70, file:'dwolf_coming_soon.html',
+    tags:['Ratio','P6 Prelim','★★☆']
+  },
+  {
+    id:'mkg-007', code:'MKG-007', name:'Coin Vault Heist',
+    desc:'Fraction split · coin value equation · two-vault problem',
+    topic:'Fractions + Value', icon:'coins', status:'active',
+    stars:0, xp:0, score:0, file:'dwolf_mission.html',
+    tags:['Fractions','Value','P6 Prelim','★★★']
+  },
+  {
+    id:'mkg-003', code:'MKG-003', name:'Percentage Peak',
+    desc:'Increase · decrease · find original value · Rachel & Maggie ops',
+    topic:'Percentage', icon:'percentage', status:'active',
+    stars:1, xp:0, score:45, file:'dwolf_coming_soon.html',
+    tags:['Percentage','P6 Prelim','★★★'], alert:'⚠ WEAKENING — DEFEND!'
+  },
+  {
+    id:'mkg-004', code:'MKG-004', name:'Algebra Airship',
+    desc:'Simple equations · unknowns · substitution · NEW P6 2026',
+    topic:'Algebra', icon:'algebra', status:'new',
+    stars:0, xp:0, score:0, file:'dwolf_coming_soon.html',
+    tags:['Algebra','NEW P6','★★☆']
+  },
+  {
+    id:'mkg-013', code:'MKG-013', name:'Glasses Intel Op',
+    desc:'LCM · table reading · fraction of total · 3A & 3B pupils',
+    topic:'Ratio + Fraction + LCM', icon:'ratio', status:'active',
+    stars:0, xp:0, score:0, file:'dwolf_mkg_013.html',
+    tags:['Ratio','Fraction','LCM','P6 Prelim','★★★']
+  },
+  {
+    id:'mkg-017', code:'MKG-017', name:'Bakery Supply Op',
+    desc:'Minimum boxes · bar model units · system of prices · Alice & Ben',
+    topic:'Fraction + Multiples', icon:'coins', status:'active',
+    stars:0, xp:0, score:0, file:'dwolf_mkg_017.html',
+    tags:['Fraction','Multiples','P6 Prelim','★★★★'],
+    badge:'INCLUDES QUIZ'
+  },
+  {
+    id:'mkg-005', code:'MKG-005', name:'Average Arena',
+    desc:'Mean · grouping · weighted average',
+    topic:'Average', icon:'average', status:'locked',
+    stars:0, xp:0, score:0, file:'', tags:['Average','P6 Syllabus','★★☆'],
+    lockReason:'Complete MKG-004 to unlock'
+  },
+  {
+    id:'mkg-006', code:'MKG-006', name:'Geometry Glacier',
+    desc:'Angles in polygons · composite figures · area & perimeter',
+    topic:'Geometry', icon:'geometry', status:'locked',
+    stars:0, xp:0, score:0, file:'', tags:['Geometry','P6 Syllabus','★★★'],
+    lockReason:'Complete MKG-005 to unlock'
+  }
+];
+
+/* ══════════════════════════════
+   LOCALSTORAGE STATE + SERVER SYNC
+══════════════════════════════ */
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem('dwolf_state')||'{}'); }catch(e){return {};}
+}
+function saveState(s){
+  try{ localStorage.setItem('dwolf_state',JSON.stringify(s)); }catch(e){}
+  // Fire-and-forget sync to server
+  var token = localStorage.getItem('dwolf_token');
+  if(token){
+    fetch('/api/progress',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({xp:s.xp,coins:s.coins||0,pts:s.pts,streak_days:s.streak,level:s.level})
+    }).catch(function(){});
+  }
+}
+function getToken(){ return localStorage.getItem('dwolf_token'); }
+
+let STATE = loadState();
+// Defaults
+if(!STATE.xp) STATE.xp=0;
+if(!STATE.pts) STATE.pts=0;
+if(!STATE.streak) STATE.streak=0;
+if(!STATE.level) STATE.level='easy';
+if(!STATE.name) STATE.name='Operator';
+if(!STATE.dailyClaimed) STATE.dailyClaimed={};
+
+/* ══════════════════════════════
+   LOGIN / REGISTER / LOGOUT
+══════════════════════════════ */
+var loginMode = 'login';
+
+function switchLoginTab(mode){
+  loginMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('tab-register').classList.toggle('active', mode==='register');
+  document.getElementById('login-submit').textContent = mode==='login'?'LOGIN':'REGISTER';
+}
+
+function submitLogin(){
+  var name = document.getElementById('login-name').value.trim();
+  var pin = document.getElementById('login-pin').value.trim();
+  var errEl = document.getElementById('login-err');
+  var btn = document.getElementById('login-submit');
+
+  errEl.classList.remove('show');
+  if(!name){ showLoginErr('Enter your callsign'); return; }
+  if(!/^\d{4}$/.test(pin)){ showLoginErr('PIN must be exactly 4 digits'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'AUTHENTICATING...';
+
+  fetch('/api/auth',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:loginMode,name:name,pin:pin})
+  })
+  .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
+  .then(function(res){
+    btn.disabled = false;
+    btn.textContent = loginMode==='login'?'LOGIN':'REGISTER';
+    if(!res.ok){
+      showLoginErr(res.data.error || 'Authentication failed');
+      return;
+    }
+    // Success — store token and load state
+    localStorage.setItem('dwolf_token', res.data.token);
+    var p = res.data.progress || {};
+    STATE.name = res.data.student.name;
+    STATE.xp = p.xp || 0;
+    STATE.pts = p.pts || 0;
+    STATE.coins = p.coins || 0;
+    STATE.streak = p.streak_days || 0;
+    STATE.level = p.level || 'easy';
+    saveState(STATE);
+
+    // Apply server mission data to local MISSIONS array
+    if(res.data.missions && res.data.missions.length){
+      res.data.missions.forEach(function(mr){
+        var m = MISSIONS.find(function(x){ return x.code === mr.mission_code; });
+        if(m){
+          m.status = mr.status === 'cleared' ? 'done' : mr.status;
+          m.stars = mr.stars || 0;
+          m.score = mr.score || 0;
+        }
+      });
+    }
+
+    document.getElementById('login-overlay').classList.add('hidden');
+    updateUI();
+    renderMissions();
+  })
+  .catch(function(err){
+    btn.disabled = false;
+    btn.textContent = loginMode==='login'?'LOGIN':'REGISTER';
+    showLoginErr('Network error - check connection');
+  });
+}
+
+function showLoginErr(msg){
+  var el = document.getElementById('login-err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function logoutUser(){
+  localStorage.removeItem('dwolf_token');
+  localStorage.removeItem('dwolf_state');
+  STATE = {xp:0,pts:0,streak:0,level:'easy',name:'Operator',dailyClaimed:{}};
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('login-name').value = '';
+  document.getElementById('login-pin').value = '';
+  document.getElementById('login-err').classList.remove('show');
+}
+
+// Check auth on load
+function checkAuth(){
+  var token = getToken();
+  if(!token){
+    document.getElementById('login-overlay').classList.remove('hidden');
+    return;
+  }
+  // Verify token and load progress from server
+  fetch('/api/progress',{
+    method:'GET',
+    headers:{'Authorization':'Bearer '+token}
+  })
+  .then(function(r){
+    if(!r.ok) throw new Error('unauthorized');
+    return r.json();
+  })
+  .then(function(data){
+    var p = data.progress || {};
+    STATE.xp = p.xp || STATE.xp;
+    STATE.pts = p.pts || STATE.pts;
+    STATE.coins = p.coins || STATE.coins || 0;
+    STATE.streak = p.streak_days || STATE.streak;
+    STATE.level = p.level || STATE.level;
+    saveState(STATE);
+
+    // Sync mission results
+    if(data.missions && data.missions.length){
+      data.missions.forEach(function(mr){
+        var m = MISSIONS.find(function(x){ return x.code === mr.mission_code; });
+        if(m){
+          m.status = mr.status === 'cleared' ? 'done' : mr.status;
+          m.stars = mr.stars || 0;
+          m.score = mr.score || 0;
+        }
+      });
+    }
+    updateUI();
+    renderMissions();
+  })
+  .catch(function(){
+    // Token invalid or server down — show login
+    document.getElementById('login-overlay').classList.remove('hidden');
+  });
+}
+
+/* ══════════════════════════════
+   ICONS
+══════════════════════════════ */
+const ICONS = {
+  fractions:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"><polygon points="14,4 24,22 4,22"/><line x1="14" y1="10" x2="14" y2="16"/><line x1="11" y1="13" x2="17" y2="13"/></svg>`,
+  ratio:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="3" y="9" width="22" height="10" rx="1"/><line x1="3" y1="14" x2="25" y2="14" stroke-dasharray="3 2"/><line x1="10" y1="9" x2="10" y2="19" stroke-dasharray="3 2"/><line x1="18" y1="9" x2="18" y2="19" stroke-dasharray="3 2"/></svg>`,
+  coins:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--amber)" stroke-width="1.5"><circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="6"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="14" y1="20" x2="14" y2="24"/></svg>`,
+  percentage:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--red)" stroke-width="1.5"><line x1="5" y1="23" x2="23" y2="5"/><circle cx="8" cy="8" r="3.5"/><circle cx="20" cy="20" r="3.5"/></svg>`,
+  algebra:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round"><path d="M6 20L12 8M22 20L16 8M8 15L20 15"/></svg>`,
+  average:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#3a4a2a" stroke-width="1.5"><polyline points="4,20 9,12 13,16 18,8 24,14"/><line x1="4" y1="20" x2="24" y2="20"/></svg>`,
+  geometry:`<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#3a4a2a" stroke-width="1.5"><polygon points="14,4 24,20 4,20"/><line x1="14" y1="4" x2="14" y2="20"/><line x1="4" y1="20" x2="24" y2="20"/></svg>`,
+};
+
+const DIFF_MAP = {'★★☆':'tag-diff-easy','★★★':'tag-diff-med','★★★★':'tag-diff-hard'};
+
+/* ══════════════════════════════
+   RENDER MISSIONS
+══════════════════════════════ */
+let currentFilter='all';
+function renderMissions(){
+  const list = document.getElementById('mission-list');
+  let html='';
+  const filtered = MISSIONS.filter(m=>{
+    if(currentFilter==='all') return true;
+    if(currentFilter==='active') return m.status==='active'||m.status==='new';
+    if(currentFilter==='done') return m.status==='done';
+    if(currentFilter==='locked') return m.status==='locked';
+    return true;
+  });
+  filtered.forEach(m=>{
+    const pct = m.score;
+    const accentCol = m.status==='done'?'var(--accent)':m.status==='active'?'var(--amber)':m.status==='new'?'var(--purple)':'var(--text3)';
+    let badgeHtml='';
+    if(m.status==='done') badgeHtml=`<span class="mc-badge badge-done">✓ CLEARED</span>`;
+    else if(m.status==='active') badgeHtml=`<span class="mc-badge badge-active">${m.alert||'▶ ACTIVE'}</span>`;
+    else if(m.status==='new') badgeHtml=`<span class="mc-badge badge-new">✨ NEW OP</span>`;
+    else badgeHtml=`<span class="mc-badge badge-locked">🔒 LOCKED</span>`;
+    if(m.badge) badgeHtml+=`<span class="mc-badge" style="background:var(--purple-l);color:var(--purple);border:1px solid rgba(139,92,246,.3);margin-top:3px">🎮 ${m.badge}</span>`;
+
+    const starsHtml = [1,2,3].map(i=>{
+      const filled = i<=m.stars;
+      return `<svg width="11" height="11" viewBox="0 0 11 11"><polygon points="5.5,1 7,4.5 11,4.8 8.2,7.2 9.1,11 5.5,9 1.9,11 2.8,7.2 0,4.8 4,4.5" fill="${filled?'#f39c12':'#3a4a2a'}"/></svg>`;
+    }).join('');
+
+    const tagHtml = m.tags.map(t=>{
+      const cls = DIFF_MAP[t]||'tag-topic';
+      return `<span class="mc-tag ${cls}">${t}</span>`;
+    }).join('');
+
+    const isLocked = m.status==='locked';
+    const href = isLocked?'javascript:void(0)':(m.file||'javascript:void(0)');
+    const clickFn = isLocked?`onclick="return false"`:`onclick="launchMission('${m.file}','${m.id}')"`;
+
+    html+=`
+    <a class="mc ${m.status}" href="${href}" ${clickFn} style="--mc-col:${accentCol}">
+      <div class="mc-icon">${ICONS[m.icon]||''}</div>
+      <div class="mc-body">
+        <div class="mc-top">
+          <span class="mc-code">${m.code}</span>
+          <span class="mc-name">${m.name}</span>
+        </div>
+        <div class="mc-sub">${m.desc}${m.lockReason?` · <em style="color:var(--text3)">${m.lockReason}</em>`:''}</div>
+        <div class="mc-tags">${tagHtml}</div>
+        ${pct>0?`<div class="mc-prog"><div class="mc-prog-fill" style="width:${pct}%;background:${accentCol}"></div></div>`:''}
+      </div>
+      <div class="mc-right">
+        ${badgeHtml}
+        ${m.stars>0?`<div class="mc-stars">${starsHtml}</div>`:''}
+        ${m.xp>0?`<div class="mc-xp">+${m.xp} XP</div>`:`<div class="mc-xp" style="color:var(--text3)">+XP inside</div>`}
+        ${m.score>0?`<div class="mc-score">${m.score}%</div>`:''}
+      </div>
+    </a>`;
+  });
+  list.innerHTML = html;
+}
+function filterMissions(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('act'));
+  btn.classList.add('act');
+  renderMissions();
+}
+
+/* ══════════════════════════════
+   LAUNCH MISSION
+══════════════════════════════ */
+function launchMission(file, id){
+  if(!file) return;
+  // Save current level in localStorage so mission file picks it up
+  saveState(STATE);
+  // Navigate to mission file
+  window.location.href = file+'?level='+STATE.level;
+}
+function openMission(id){
+  if(id==='boss') alert('Final Boss unlocks when all missions are cleared! Complete remaining missions first.');
+}
+
+/* ══════════════════════════════
+   UPDATE HEADER / HERO
+══════════════════════════════ */
+function updateUI(){
+  document.getElementById('hdr-name').textContent = STATE.name.toUpperCase();
+  document.getElementById('hdr-xp').textContent = STATE.xp+' XP';
+  document.getElementById('hdr-pts').textContent = STATE.pts+' PTS';
+  document.getElementById('hdr-streak').textContent = STATE.streak+'d';
+  document.getElementById('hero-name').textContent = STATE.name;
+  document.getElementById('lb-your-pts').textContent = STATE.pts;
+
+  // XP bar (assume 1000 per level)
+  const lvlXP = STATE.xp % 1000;
+  const pct = Math.round(lvlXP/10);
+  document.getElementById('xp-bar').style.width = pct+'%';
+  document.getElementById('xp-num-lbl').textContent = lvlXP+' / 1000 XP';
+  document.getElementById('xp-to-next').textContent = (1000-lvlXP)+' to next rank';
+  document.getElementById('streak-count').textContent = STATE.streak;
+
+  // Streak dots
+  const streakRow = document.getElementById('streak-row');
+  let sdots='';
+  for(let i=0;i<7;i++){
+    sdots+=`<div class="streak-day${i<STATE.streak?' done':''}"></div>`;
+  }
+  streakRow.innerHTML=sdots;
+
+  // Boss HP based on missions done
+  const done = MISSIONS.filter(m=>m.status==='done').length;
+  const total = MISSIONS.length;
+  const bossHP = Math.max(10, Math.round(100 - (done/total)*60));
+  document.getElementById('boss-hp-fill').style.width = bossHP+'%';
+  document.getElementById('boss-hp-txt').textContent = bossHP+'%';
+}
+
+/* ══════════════════════════════
+   PARENT PIN MODAL
+══════════════════════════════ */
+let pendingLevel='easy';
+function selectModalLevel(l){
+  pendingLevel=l;
+  ['easy','medium','hard'].forEach(x=>{
+    const el=document.getElementById('mlv-'+x);
+    el.classList.toggle('sel',x===l);
+    el.style.borderColor=x===l?(x==='easy'?'var(--accent)':x==='medium'?'var(--amber)':'var(--red)'):'var(--border)';
+  });
+}
+function closePinModal(){
+  document.getElementById('pin-modal').classList.remove('show');
+  document.getElementById('modal-pin').value='';
+  document.getElementById('modal-err').style.display='none';
+}
+function confirmModalPin(){
+  const v=document.getElementById('modal-pin').value;
+  if(v!=='1234'){
+    document.getElementById('modal-err').style.display='block';
+    document.getElementById('modal-pin').value='';
+    return;
+  }
+  STATE.level=pendingLevel;
+  saveState(STATE);
+  closePinModal();
+  showXPPop(`Level set: ${pendingLevel.toUpperCase()} ✓`);
+}
+
+/* ══════════════════════════════
+   DAILY REWARD
+══════════════════════════════ */
+function claimDaily(){
+  const today = new Date().toDateString();
+  if(STATE.dailyClaimed[today]){
+    showXPPop('Already claimed today!');
+    return;
+  }
+  STATE.dailyClaimed[today]=true;
+  STATE.xp+=50;
+  STATE.pts+=25;
+  saveState(STATE);
+  updateUI();
+  showXPPop('+50 XP · Daily Intel Drop!');
+}
+
+/* ══════════════════════════════
+   PARENT REPORT
+══════════════════════════════ */
+function sendReport(){
+  const done = MISSIONS.filter(m=>m.status==='done').map(m=>m.name).join(', ');
+  const active = MISSIONS.filter(m=>m.status==='active').map(m=>m.name).join(', ');
+  alert(`📡 MISSION REPORT — ${STATE.name}\n\nXP: ${STATE.xp} · Score: ${STATE.pts} · Streak: ${STATE.streak} days\n\nCleared: ${done||'None yet'}\nActive: ${active||'None'}\n\n(Connect Resend email in Phase 2 to auto-send this to parents!)`);
+}
+
+/* ══════════════════════════════
+   FLOATING POP
+══════════════════════════════ */
+function showXPPop(txt){
+  const p=document.createElement('div');
+  p.className='pop xp';
+  p.style.cssText=`left:50%;top:50%;transform:translate(-50%,-50%)`;
+  p.textContent=txt;
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),1250);
+}
+
+/* ══════════════════════════════
+   INIT
+══════════════════════════════ */
+renderMissions();
+updateUI();
+// Set pending level from saved state
+pendingLevel=STATE.level||'easy';
+selectModalLevel(pendingLevel);
+// Check auth and sync from server
+checkAuth();
+// Allow Enter key in login form
+document.getElementById('login-pin').addEventListener('keydown',function(e){
+  if(e.key==='Enter') submitLogin();
+});
+document.getElementById('login-name').addEventListener('keydown',function(e){
+  if(e.key==='Enter') document.getElementById('login-pin').focus();
+});
+</script>
+</body>
+</html>
