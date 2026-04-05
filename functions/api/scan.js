@@ -28,7 +28,7 @@ export async function onRequest(context) {
 
     if (listMode) {
       var jobs = await env.DB.prepare(
-        'SELECT id, status, mode, result, created_at, completed_at FROM scan_jobs WHERE student_id = ? ORDER BY created_at DESC LIMIT 20'
+        'SELECT id, status, mode, model, result, created_at, completed_at FROM scan_jobs WHERE student_id = ? ORDER BY created_at DESC LIMIT 20'
       ).bind(user.student_id).all();
       // Add preview info (grade, question snippet) without sending full result
       var jobList = (jobs.results || []).map(function(j) {
@@ -41,7 +41,7 @@ export async function onRequest(context) {
             preview.question = (parsed.question_text || '').substring(0, 60);
           } catch (e) {}
         }
-        return { id: j.id, status: j.status, mode: j.mode, created_at: j.created_at, preview: preview };
+        return { id: j.id, status: j.status, mode: j.mode, model: j.model || '', created_at: j.created_at, preview: preview };
       });
       return jsonResponse({ jobs: jobList });
     }
@@ -79,8 +79,8 @@ export async function onRequest(context) {
 
     // Insert pending job
     await env.DB.prepare(
-      'INSERT INTO scan_jobs (id, student_id, status, mode, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)'
-    ).bind(jobId, user.student_id, 'processing', mode).run();
+      'INSERT INTO scan_jobs (id, student_id, status, mode, model, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)'
+    ).bind(jobId, user.student_id, 'processing', mode, model).run();
 
     // Process in background using waitUntil so we can return immediately
     context.waitUntil(processBackgroundJob(env, jobId, user.student_id, model, body));
@@ -122,8 +122,8 @@ export async function onRequest(context) {
     }
     try {
       await env.DB.prepare(
-        'INSERT INTO scan_jobs (id, student_id, status, mode, result, created_at, completed_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-      ).bind(jobId, user.student_id, 'done', mode, resultText).run();
+        'INSERT INTO scan_jobs (id, student_id, status, mode, model, result, created_at, completed_at) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
+      ).bind(jobId, user.student_id, 'done', mode, model, resultText).run();
     } catch (e) {}
     saveScanResult(env, user.student_id, result);
   }
