@@ -868,7 +868,8 @@ function goDebrief(){
   try{
     var tk=localStorage.getItem('dwolf_token');
     if(tk){
-      fetch('/api/missions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({code:'MKG-013',stars:stars,score:score,xp_earned:xp})}).catch(function(){});
+      var ab=window.location.pathname.replace(/\/[^/]*$/,'');if(ab==='/')ab='';
+      fetch(ab+'/api/missions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({code:'MKG-013',stars:stars,score:score,xp_earned:xp})}).catch(function(){});
     }
   }catch(e){}
 }

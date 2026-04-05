@@ -697,6 +697,15 @@ body::before{
 
 <script>
 /* ══════════════════════════════
+   API BASE PATH
+══════════════════════════════ */
+var API_BASE = (function(){
+  var p = window.location.pathname.replace(/\/[^/]*$/, '');
+  if (p === '' || p === '/') return '';
+  return p;
+})();
+
+/* ══════════════════════════════
    MISSION DATA
 ══════════════════════════════ */
 const MISSIONS = [
@@ -777,7 +786,7 @@ function saveState(s){
   // Fire-and-forget sync to server
   var token = localStorage.getItem('dwolf_token');
   if(token){
-    fetch('/api/progress',{
+    fetch(API_BASE+'/api/progress',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
       body:JSON.stringify({xp:s.xp,coins:s.coins||0,pts:s.pts,streak_days:s.streak,level:s.level})
@@ -820,7 +829,7 @@ function submitLogin(){
   btn.disabled = true;
   btn.textContent = 'AUTHENTICATING...';
 
-  fetch('/api/auth',{
+  fetch(API_BASE+'/api/auth',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({action:loginMode,name:name,pin:pin})
@@ -891,7 +900,7 @@ function checkAuth(){
     return;
   }
   // Verify token and load progress from server
-  fetch('/api/progress',{
+  fetch(API_BASE+'/api/progress',{
     method:'GET',
     headers:{'Authorization':'Bearer '+token}
   })

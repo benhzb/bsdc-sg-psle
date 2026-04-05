@@ -526,7 +526,8 @@ function callClaudeAPI() {
   var hdrs = { 'Content-Type': 'application/json' };
   if (token) hdrs['Authorization'] = 'Bearer ' + token;
 
-  fetch('/api/scan', {
+  var apiBase=window.location.pathname.replace(/\/[^/]*$/,'');if(apiBase==='/')apiBase='';
+  fetch(apiBase+'/api/scan', {
     method: 'POST',
     headers: hdrs,
     body: JSON.stringify({
