@@ -232,7 +232,7 @@ html,body{min-height:100vh;background:#050705;display:flex;justify-content:cente
       </div>
       <div class="res-btns">
         <button class="res-main" onclick="location.reload()">RETRY QUIZ</button>
-        <button class="res-sec" onclick="window.location.href='../index.html'">MISSION BOARD</button>
+        <button class="res-sec" onclick="window.location.href=(window.location.pathname.split('/').slice(0,-1).join('/')||'/')+'/'">MISSION BOARD</button>
       </div>
     </div>
   </div>

@@ -686,7 +686,7 @@ function renderResults(r) {
     // ACTIONS
     + '<div class="action-row">'
     + '<button class="act-main" onclick="scanAnother()">SCAN ANOTHER PAPER</button>'
-    + '<button class="act-sec" onclick="window.location.href=\'index.html\'">MISSION BOARD</button>'
+    + '<button class="act-sec" onclick="window.location.href=(window.location.pathname.split(\'/\').slice(0,-1).join(\'/\')||\'\/\')+\'/\'">MISSION BOARD</button>'
     + '</div>';
 
   // Save XP to localStorage
