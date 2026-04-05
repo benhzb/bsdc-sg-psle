@@ -860,7 +860,7 @@ function showResults() {
   try{
     var tk=localStorage.getItem('dwolf_token');
     if(tk){
-      var ab=window.location.pathname.replace(/\/[^/]*$/,'');if(ab==='/')ab='';
+      var pp=window.location.pathname.split('/').filter(Boolean);var ab=(pp.length>0&&pp[0]!=='api')?'/'+pp[0]:'';
       fetch(ab+'/api/quiz',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({code:'MKG-013Q',score:totalScore,correct:correct,total:total,stars:stars})}).catch(function(){});
     }
   }catch(e){}

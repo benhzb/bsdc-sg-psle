@@ -700,9 +700,9 @@ body::before{
    API BASE PATH
 ══════════════════════════════ */
 var API_BASE = (function(){
-  var p = window.location.pathname.replace(/\/[^/]*$/, '');
-  if (p === '' || p === '/') return '';
-  return p;
+  var parts = window.location.pathname.split('/').filter(Boolean);
+  if (parts.length > 0 && parts[0] !== 'api') return '/' + parts[0];
+  return '';
 })();
 
 /* ══════════════════════════════
