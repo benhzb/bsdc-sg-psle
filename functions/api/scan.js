@@ -1,12 +1,41 @@
 import { authenticate, jsonResponse, handleOptions } from './_helpers.js';
 
-// Cloudflare AI REST API endpoint
-var CF_AI_URL = 'https://api.cloudflare.com/client/v4/accounts/1608df142a7ce09054aa80a1e5dee8ff/ai/run/@cf/meta/llama-3.2-11b-vision-instruct';
-
 export async function onRequest(context) {
   var { request, env } = context;
 
   if (request.method === 'OPTIONS') return handleOptions();
+
+  // GET: list jobs or fetch a specific job result
+  if (request.method === 'GET') {
+    var user = await authenticate(request, env);
+    if (!user) return jsonResponse({ error: 'Unauthorized' }, 401);
+
+    var url = new URL(request.url);
+    var jobId = url.searchParams.get('job_id');
+    var listMode = url.searchParams.get('list');
+
+    if (jobId) {
+      var job = await env.DB.prepare(
+        'SELECT id, status, result, created_at, completed_at FROM scan_jobs WHERE id = ? AND student_id = ?'
+      ).bind(jobId, user.student_id).first();
+      if (!job) return jsonResponse({ error: 'Job not found' }, 404);
+      var result = job.result;
+      if (result) {
+        try { result = JSON.parse(result); } catch (e) {}
+      }
+      return jsonResponse({ id: job.id, status: job.status, result: result, created_at: job.created_at, completed_at: job.completed_at });
+    }
+
+    if (listMode) {
+      var jobs = await env.DB.prepare(
+        'SELECT id, status, created_at, completed_at FROM scan_jobs WHERE student_id = ? ORDER BY created_at DESC LIMIT 20'
+      ).bind(user.student_id).all();
+      return jsonResponse({ jobs: jobs.results || [] });
+    }
+
+    return jsonResponse({ error: 'Provide job_id or list=1' }, 400);
+  }
+
   if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405);
 
   var user = await authenticate(request, env);
@@ -22,10 +51,34 @@ export async function onRequest(context) {
     return jsonResponse({ error: 'Messages array required' }, 400);
   }
 
+  var mode = body.mode || 'standard';
+  var model = body.model || 'claude-haiku-4-5-20251001';
+
+  // Force model based on mode
+  if (mode === 'express') model = 'claude-sonnet-4-20250514';
+  else if (mode === 'standard' || mode === 'background') model = 'claude-haiku-4-5-20251001';
+
+  // Background mode: process with Haiku, store result, return job ID
+  if (mode === 'background') {
+    if (!user) return jsonResponse({ error: 'Login required for background scans' }, 401);
+
+    var jobId = 'SCAN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+    // Insert pending job
+    await env.DB.prepare(
+      'INSERT INTO scan_jobs (id, student_id, status, mode, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)'
+    ).bind(jobId, user.student_id, 'processing', mode).run();
+
+    // Process in background using waitUntil so we can return immediately
+    context.waitUntil(processBackgroundJob(env, jobId, user.student_id, model, body));
+
+    return jsonResponse({ job_id: jobId, status: 'processing', message: 'Your scan is being analysed. Check back shortly.' });
+  }
+
+  // Express / Standard: process immediately
   var result;
   var status = 200;
 
-  // Option 1: Anthropic API (if key configured)
   if (env.ANTHROPIC_API_KEY) {
     var anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -35,57 +88,74 @@ export async function onRequest(context) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: body.model || 'claude-sonnet-4-20250514',
+        model: model,
         max_tokens: body.max_tokens || 4000,
         messages: body.messages
       })
     });
     result = await anthropicResponse.json();
     status = anthropicResponse.status;
-
-  // Option 2: Workers AI binding
-  } else if (env.AI) {
-    try {
-      var msgs = buildAIMessages(body.messages);
-      var aiResult = await env.AI.run('@cf/meta/llama-3.2-11b-vision-instruct', {
-        messages: msgs,
-        max_tokens: 4000
-      });
-      result = { content: [{ type: 'text', text: aiResult.response || JSON.stringify(aiResult) }] };
-    } catch (aiErr) {
-      result = { error: { type: 'ai_error', message: aiErr.message } };
-      status = 500;
-    }
-
-  // Option 3: Cloudflare AI REST API (using CF API Token)
-  } else if (env.CF_API_TOKEN) {
-    try {
-      var msgs2 = buildAIMessages(body.messages);
-      var cfResp = await fetch(CF_AI_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + env.CF_API_TOKEN
-        },
-        body: JSON.stringify({ messages: msgs2, max_tokens: 4000 })
-      });
-      var cfResult = await cfResp.json();
-      if (cfResult.success && cfResult.result) {
-        result = { content: [{ type: 'text', text: cfResult.result.response || JSON.stringify(cfResult.result) }] };
-      } else {
-        result = { error: { type: 'ai_error', message: JSON.stringify(cfResult.errors || cfResult) } };
-        status = 500;
-      }
-    } catch (cfErr) {
-      result = { error: { type: 'ai_error', message: cfErr.message } };
-      status = 500;
-    }
-
   } else {
-    return jsonResponse({ error: 'No AI provider configured' }, 500);
+    return jsonResponse({ error: 'ANTHROPIC_API_KEY not configured' }, 500);
   }
 
-  // For non-Anthropic responses, ensure the text is valid JSON matching expected schema
+  // Ensure valid JSON in response
+  result = normalizeResult(result);
+
+  // Save to scan_results if authenticated
+  if (user && result.content) {
+    saveScanResult(env, user.student_id, result);
+  }
+
+  return new Response(JSON.stringify(result), {
+    status: status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    }
+  });
+}
+
+async function processBackgroundJob(env, jobId, studentId, model, body) {
+  try {
+    var anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: body.max_tokens || 4000,
+        messages: body.messages
+      })
+    });
+    var result = await anthropicResponse.json();
+    result = normalizeResult(result);
+
+    // Extract JSON text from result
+    var resultText = '';
+    if (result.content) {
+      for (var i = 0; i < result.content.length; i++) {
+        if (result.content[i].type === 'text') resultText += result.content[i].text;
+      }
+    }
+
+    await env.DB.prepare(
+      'UPDATE scan_jobs SET status = ?, result = ?, completed_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind('done', resultText, jobId).run();
+
+    saveScanResult(env, studentId, result);
+  } catch (e) {
+    await env.DB.prepare(
+      'UPDATE scan_jobs SET status = ?, result = ?, completed_at = CURRENT_TIMESTAMP WHERE id = ?'
+    ).bind('failed', JSON.stringify({ error: e.message }), jobId).run();
+  }
+}
+
+function normalizeResult(result) {
   if (result.content && result.content.length > 0) {
     var rawText = '';
     for (var m = 0; m < result.content.length; m++) {
@@ -93,11 +163,9 @@ export async function onRequest(context) {
     }
     rawText = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
 
-    // Try to parse as JSON first
     var parsed = null;
     try { parsed = JSON.parse(rawText); } catch (e) {}
 
-    // If not valid JSON, build a structured response from the raw text
     if (!parsed) {
       parsed = {
         question_text: 'Question from uploaded photo',
@@ -121,57 +189,21 @@ export async function onRequest(context) {
       };
     }
 
-    // Replace the content with valid JSON
     result.content = [{ type: 'text', text: JSON.stringify(parsed) }];
   }
-
-  // Save scan result to DB if authenticated
-  if (user && result.content) {
-    try {
-      var text = '';
-      for (var k = 0; k < result.content.length; k++) {
-        if (result.content[k].type === 'text') text += result.content[k].text;
-      }
-      text = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-      var parsed = JSON.parse(text);
-      await env.DB.prepare(
-        'INSERT INTO scan_results (student_id, question_text, grade, score_pct, errors_count, xp_earned) VALUES (?, ?, ?, ?, ?, ?)'
-      ).bind(user.student_id, parsed.question_text || '', parsed.grade || '', parsed.score_estimate || 0, (parsed.errors || []).length, parsed.xp_earned || 0).run();
-    } catch (e) {}
-  }
-
-  return new Response(JSON.stringify(result), {
-    status: status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    }
-  });
+  return result;
 }
 
-function buildAIMessages(messages) {
-  var userContent = messages[0].content;
-  var promptText = '';
-  var imageData = [];
-
-  for (var i = 0; i < userContent.length; i++) {
-    if (userContent[i].type === 'text') promptText = userContent[i].text;
-    else if (userContent[i].type === 'image') imageData.push(userContent[i].source);
-  }
-
-  if (imageData.length > 0) {
-    var parts = [];
-    for (var j = 0; j < imageData.length; j++) {
-      parts.push({
-        type: 'image_url',
-        image_url: {
-          url: 'data:' + imageData[j].media_type + ';base64,' + imageData[j].data
-        }
-      });
+function saveScanResult(env, studentId, result) {
+  try {
+    var text = '';
+    for (var k = 0; k < result.content.length; k++) {
+      if (result.content[k].type === 'text') text += result.content[k].text;
     }
-    parts.push({ type: 'text', text: promptText });
-    return [{ role: 'user', content: parts }];
-  }
-  return [{ role: 'user', content: promptText }];
+    text = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    var parsed = JSON.parse(text);
+    env.DB.prepare(
+      'INSERT INTO scan_results (student_id, question_text, grade, score_pct, errors_count, xp_earned) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(studentId, parsed.question_text || '', parsed.grade || '', parsed.score_estimate || 0, (parsed.errors || []).length, parsed.xp_earned || 0).run();
+  } catch (e) {}
 }

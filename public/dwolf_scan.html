@@ -205,6 +205,36 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:va
 .anno-label{font-size:.78rem;font-weight:800;color:#fff;margin-bottom:2px}
 .anno-detail{font-size:.72rem;color:var(--text2);line-height:1.5}
 
+/* ── MODE SELECTOR ── */
+.mode-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:500px){.mode-selector{grid-template-columns:1fr}}
+.mode-card{background:var(--panel);border:2px solid var(--bdr);padding:14px 12px;border-radius:2px;cursor:pointer;transition:all .2s;text-align:center;position:relative}
+.mode-card:hover{border-color:var(--bdr2);background:var(--panel2)}
+.mode-card.selected{border-color:var(--accent);background:rgba(124,181,24,.06)}
+.mode-card.selected::after{content:'SELECTED';position:absolute;top:6px;right:8px;font-size:.5rem;font-weight:800;letter-spacing:1px;color:var(--accent);font-family:var(--ffm)}
+.mc-icon{font-size:1.6rem;margin-bottom:6px}
+.mc-name{font-size:.82rem;font-weight:900;color:#fff;margin-bottom:3px;letter-spacing:.5px}
+.mc-desc{font-size:.65rem;color:var(--text2);line-height:1.4;margin-bottom:8px}
+.mc-meta{display:flex;flex-direction:column;gap:3px}
+.mc-meta-row{display:flex;justify-content:space-between;font-size:.6rem;font-family:var(--ffm)}
+.mc-meta-label{color:var(--text3)}
+.mc-meta-value{font-weight:700}
+.mc-cost{display:flex;gap:2px;justify-content:center;margin-top:6px}
+.mc-cost-dot{width:6px;height:6px;border-radius:50%}
+.mc-cost-dot.on{background:var(--amber)}
+.mc-cost-dot.off{background:var(--text3);opacity:.3}
+
+/* ── MY SCANS ── */
+.my-scans{margin-top:14px;padding:14px;background:var(--panel);border:1px solid var(--bdr);border-radius:2px}
+.ms-title{font-size:.65rem;font-weight:800;letter-spacing:2px;color:var(--blue);font-family:var(--ffm);text-transform:uppercase;margin-bottom:10px}
+.scan-job{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:.75rem}
+.sj-id{font-family:var(--ffm);color:var(--text2);font-size:.65rem}
+.sj-status{font-weight:800;font-size:.6rem;letter-spacing:.5px;padding:2px 8px;border-radius:10px}
+.sj-done{background:rgba(20,160,70,.15);color:#22c55e}
+.sj-pending{background:rgba(245,158,11,.15);color:var(--amber)}
+.sj-processing{background:rgba(56,189,248,.15);color:var(--blue)}
+.sj-view{font-size:.65rem;font-weight:800;color:var(--accent);cursor:pointer;text-decoration:underline;letter-spacing:.5px}
+
 /* ENCOURAGEMENT PANEL */
 .enc-box{background:linear-gradient(135deg,rgba(124,181,24,.08),rgba(45,212,191,.05));border:1px solid var(--bdr2);border-radius:2px;padding:16px;text-align:center}
 .enc-wolf{font-size:2.5rem;display:block;margin-bottom:8px;animation:bob 3s ease-in-out infinite}
@@ -273,6 +303,12 @@ canvas{display:none}
 
     <button class="start-scan-btn" onclick="goScr('s1')">START SCAN OP</button>
     <p class="intro-note">You can upload 1 photo if both question and working are in the same image, or 2 separate photos. Works best with clear, well-lit photos.</p>
+
+    <!-- MY SCANS -->
+    <div class="my-scans" id="my-scans" style="display:none;width:100%;text-align:left">
+      <div class="ms-title">// MY BACKGROUND SCANS //</div>
+      <div id="my-scans-list"></div>
+    </div>
   </div>
 </div>
 
@@ -324,7 +360,60 @@ canvas{display:none}
       <div class="eb-msg" id="err-msg">Something went wrong. Please try again with a clearer photo.</div>
     </div>
 
+    <!-- MODE SELECTOR -->
+    <div class="step-hdr" style="margin-bottom:10px">
+      <div class="sh-eye">// STEP 2 &middot; SELECT MODE //</div>
+      <div class="sh-txt">Choose analysis speed vs cost. <strong>Standard</strong> gives great results at low cost.</div>
+    </div>
+    <div class="mode-selector" id="mode-selector">
+      <div class="mode-card" onclick="selectMode('express',this)" id="mode-express">
+        <div class="mc-icon">&#x26A1;</div>
+        <div class="mc-name">EXPRESS</div>
+        <div class="mc-desc">Best quality analysis with detailed bar models</div>
+        <div class="mc-meta">
+          <div class="mc-meta-row"><span class="mc-meta-label">MODEL</span><span class="mc-meta-value" style="color:var(--purple)">Claude Sonnet</span></div>
+          <div class="mc-meta-row"><span class="mc-meta-label">SPEED</span><span class="mc-meta-value" style="color:var(--accent)">~10 sec</span></div>
+        </div>
+        <div class="mc-cost"><div class="mc-cost-dot on"></div><div class="mc-cost-dot on"></div><div class="mc-cost-dot on"></div></div>
+      </div>
+      <div class="mode-card selected" onclick="selectMode('standard',this)" id="mode-standard">
+        <div class="mc-icon">&#x2726;</div>
+        <div class="mc-name">STANDARD</div>
+        <div class="mc-desc">Great value &mdash; fast results at low cost</div>
+        <div class="mc-meta">
+          <div class="mc-meta-row"><span class="mc-meta-label">MODEL</span><span class="mc-meta-value" style="color:var(--blue)">Claude Haiku</span></div>
+          <div class="mc-meta-row"><span class="mc-meta-label">SPEED</span><span class="mc-meta-value" style="color:var(--accent)">~5 sec</span></div>
+        </div>
+        <div class="mc-cost"><div class="mc-cost-dot on"></div><div class="mc-cost-dot off"></div><div class="mc-cost-dot off"></div></div>
+      </div>
+      <div class="mode-card" onclick="selectMode('background',this)" id="mode-background">
+        <div class="mc-icon">&#x1F552;</div>
+        <div class="mc-name">BACKGROUND</div>
+        <div class="mc-desc">Submit now, check results later</div>
+        <div class="mc-meta">
+          <div class="mc-meta-row"><span class="mc-meta-label">MODEL</span><span class="mc-meta-value" style="color:var(--blue)">Claude Haiku</span></div>
+          <div class="mc-meta-row"><span class="mc-meta-label">SPEED</span><span class="mc-meta-value" style="color:var(--amber)">Check later</span></div>
+        </div>
+        <div class="mc-cost"><div class="mc-cost-dot on"></div><div class="mc-cost-dot off"></div><div class="mc-cost-dot off"></div></div>
+      </div>
+    </div>
+
     <button class="analyse-btn" id="analyse-btn" onclick="runAnalysis()">ANALYSE MY WORKING</button>
+  </div>
+</div>
+
+<!-- S-BG: BACKGROUND JOB SUBMITTED -->
+<div class="scr" id="s-bg">
+  <div style="padding:28px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div style="font-size:3.5rem;filter:drop-shadow(0 0 18px rgba(124,181,24,.3))">&#x1F4E8;</div>
+    <div style="font-size:.6rem;font-weight:800;letter-spacing:2.5px;color:var(--accent);font-family:var(--ffm)">BACKGROUND SCAN SUBMITTED</div>
+    <div style="font-size:1.3rem;font-weight:900;color:#fff">Your scan is being analysed</div>
+    <div style="font-size:.82rem;color:var(--text2);max-width:400px;line-height:1.6">Come back anytime to check your results. Your analysis will be ready within a few minutes.</div>
+    <div style="background:var(--panel);border:1px solid var(--bdr2);padding:14px 24px;font-family:var(--ffm);font-size:.82rem;color:var(--accent);font-weight:700;letter-spacing:1px" id="bg-job-id">JOB-XXXX</div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="start-scan-btn" onclick="checkMyScans()" style="padding:10px 24px;font-size:.8rem">CHECK MY SCANS</button>
+      <button class="cam-btn" onclick="goScr('s0')" style="padding:10px 20px;margin:0;font-size:.78rem">BACK</button>
+    </div>
   </div>
 </div>
 
@@ -359,6 +448,21 @@ var images = [];      // array of base64 strings (without data: prefix)
 var imageTypes = [];  // mime types
 var stream = null;
 var analysisResult = null;
+var scanMode = 'standard'; // express | standard | background
+
+/* ── MODE SELECTOR ── */
+function selectMode(mode, el) {
+  scanMode = mode;
+  var cards = document.querySelectorAll('.mode-card');
+  for (var i = 0; i < cards.length; i++) cards[i].classList.remove('selected');
+  if (el) el.classList.add('selected');
+  var btn = document.getElementById('analyse-btn');
+  if (btn) {
+    if (mode === 'background') btn.textContent = 'SUBMIT FOR BACKGROUND ANALYSIS';
+    else if (mode === 'express') btn.textContent = 'ANALYSE (EXPRESS)';
+    else btn.textContent = 'ANALYSE MY WORKING';
+  }
+}
 
 /* ── NAVIGATION ── */
 function goScr(id) {
@@ -524,9 +628,14 @@ function runAnalysis() {
   if (images.length === 0) return;
   var errBanner = document.getElementById('err-banner');
   if (errBanner) errBanner.classList.remove('on');
-  goScr('s2');
-  animateSteps();
-  callClaudeAPI();
+
+  if (scanMode === 'background') {
+    callClaudeAPI();
+  } else {
+    goScr('s2');
+    animateSteps();
+    callClaudeAPI();
+  }
 }
 
 function animateSteps() {
@@ -557,6 +666,12 @@ function callClaudeAPI() {
     text: 'You are an expert Singapore primary school mathematics tutor specialising in PSLE preparation using BAR MODEL and UNIT METHOD only.\n\nA student has submitted photo(s) of their exam question with their handwritten working.\n\nAnalyse everything and respond with ONLY valid JSON (no markdown, no backticks, no preamble) in this exact structure:\n\n{\n  "question_text": "The full exam question text as written on the paper",\n  "parts": ["(a) question part a text", "(b) question part b text"],\n  "student_working": "Verbatim transcription of ALL the student handwritten working, step by step, line by line",\n  "correct_answers": {"a": "answer", "b": "answer"},\n  "student_answers": {"a": "what student wrote", "b": "what student wrote"},\n  "score_estimate": 75,\n  "grade": "B",\n  "image_annotations": [\n    {"label": "Correct!", "detail": "Bar model drawn correctly", "type": "correct"},\n    {"label": "Error here", "detail": "1/7 should be 5/35 not 4/35", "type": "error"},\n    {"label": "Missing step", "detail": "Need to show common denominator working", "type": "warning"}\n  ],\n  "errors": [\n    {\n      "part": "(a)",\n      "error_title": "Short title of the mistake",\n      "error_description": "Clear explanation of what went wrong and WHY it matters.",\n      "student_wrote": "Exact notation/calculation student used",\n      "should_be": "What the correct step should be"\n    }\n  ],\n  "correct_method": [\n    {\n      "step_number": 1,\n      "step_title": "Step title",\n      "step_explanation": "Detailed 3-5 sentence explanation of reasoning.",\n      "calculation": "The calculation string",\n      "bar_model": {\n        "type": "single",\n        "title": "Abel original tarts - fraction model",\n        "bars": [\n          {\n            "label": "Abel",\n            "segments": [\n              {"units": 5, "color": "blue", "text": "To Ben (1/7)"},\n              {"units": 14, "color": "purple", "text": "To Chris (2/5)"},\n              {"units": 16, "color": "green", "text": "Abel keeps (16/35)"}\n            ]\n          }\n        ],\n        "total_label": "35 parts total",\n        "annotation": "Abel kept 16/35 of his tarts"\n      }\n    },\n    {\n      "step_number": 2,\n      "step_title": "Step title",\n      "step_explanation": "Detailed explanation.",\n      "calculation": "4 + 3 + 9 = 16 units = 448, 1u = 28",\n      "bar_model": {\n        "type": "comparison",\n        "title": "After giving - ratio 4:3:9",\n        "bars": [\n          {"label": "Abel", "segments": [{"units": 4, "color": "amber", "text": "4u = 112"}]},\n          {"label": "Ben", "segments": [{"units": 3, "color": "blue", "text": "3u = 84"}]},\n          {"label": "Chris", "segments": [{"units": 9, "color": "purple", "text": "9u = 252"}]}\n        ],\n        "total_label": "16 units = 448 tarts",\n        "annotation": "1 unit = 28 tarts"\n      }\n    }\n  ],\n  "key_concepts": [\n    "Concept 1: detailed explanation (2-3 sentences)",\n    "Concept 2: detailed explanation (2-3 sentences)",\n    "Concept 3: common mistake to avoid (2-3 sentences)"\n  ],\n  "encouragement": "Warm encouraging message (3-4 sentences). Mention what they did well FIRST.",\n  "xp_earned": 45\n}\n\nBAR MODEL DATA RULES:\n- bar_model.type: \"single\" (one bar divided into parts), \"comparison\" (multiple bars stacked for comparison), or \"transfer\" (showing before/after with arrows)\n- Each bar has segments with: units (integer), color (one of: green, blue, purple, amber, red, teal), text (label shown on/below the segment)\n- total_label: text shown on the right bracket\n- annotation: text shown below the bar model\n- For fraction models: divide into common denominator parts, shade given-away portions\n- For ratio models: show each person as a separate bar with proportional units\n- For transfer models: show two rows (before/after) with arrows indicating transfer\n- EVERY step in correct_method MUST have a bar_model object (not just text description)\n\nIMAGE ANNOTATION RULES:\n- image_annotations: list of observations about the student photo\n- type: \"correct\" (green, something done right), \"error\" (red, mistake), \"warning\" (amber, missing/incomplete)\n- Keep label short (2-4 words), detail explains what happened\n- Include 2-5 annotations covering key observations\n\nCRITICAL RULES:\n- Use ONLY Singapore primary school methods (bar model, unit method)\n- NO algebra, NO cross-multiplication, NO variables\n- Provide 4-8 steps covering EVERY part of the question\n- Each step_explanation: 3-5 sentences explaining REASONING\n- Show verification step at the end\n- score_estimate 0-100, grade A/B/C/D, xp_earned 30-100\n- key_concepts: exactly 3 items, each 2-3 sentences'
   });
 
+  var modelMap = {
+    express: 'claude-sonnet-4-20250514',
+    standard: 'claude-haiku-4-5-20251001',
+    background: 'claude-haiku-4-5-20251001'
+  };
+
   var token = localStorage.getItem('dwolf_token') || '';
   var hdrs = { 'Content-Type': 'application/json' };
   if (token) hdrs['Authorization'] = 'Bearer ' + token;
@@ -566,13 +681,21 @@ function callClaudeAPI() {
     method: 'POST',
     headers: hdrs,
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      mode: scanMode,
+      model: modelMap[scanMode] || 'claude-haiku-4-5-20251001',
       max_tokens: 4000,
       messages: [{ role: 'user', content: content }]
     })
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
+    // Background mode: show job submitted screen
+    if (data.job_id) {
+      var jobEl = document.getElementById('bg-job-id');
+      if (jobEl) jobEl.textContent = data.job_id;
+      goScr('s-bg');
+      return;
+    }
     if (data.error) throw new Error(data.error.message || 'API error');
     var text = '';
     if (data.content && data.content.length > 0) {
@@ -580,7 +703,6 @@ function callClaudeAPI() {
         if (data.content[i].type === 'text') text += data.content[i].text;
       }
     }
-    // Strip any markdown fences if present
     text = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
     var result = JSON.parse(text);
     analysisResult = result;
@@ -593,6 +715,69 @@ function callClaudeAPI() {
     var em = document.getElementById('err-msg');
     if (eb) eb.classList.add('on');
     if (em) em.textContent = 'Analysis failed: ' + (err.message || 'Unknown error') + '. Please check your photo and try again.';
+  });
+}
+
+/* ── MY SCANS (background jobs) ── */
+function checkMyScans() {
+  var token = localStorage.getItem('dwolf_token');
+  if (!token) { goScr('s0'); return; }
+  var pp=window.location.pathname.split('/').filter(Boolean);var apiBase=(pp.length>0&&pp[0]!=='api')?'/'+pp[0]:'';
+  fetch(apiBase+'/api/scan?list=1', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var jobs = data.jobs || [];
+    var panel = document.getElementById('my-scans');
+    var list = document.getElementById('my-scans-list');
+    if (!panel || !list) return;
+    if (jobs.length === 0) {
+      panel.style.display = 'none';
+      return;
+    }
+    panel.style.display = 'block';
+    list.innerHTML = '';
+    for (var i = 0; i < jobs.length; i++) {
+      var j = jobs[i];
+      var statusCls = j.status === 'done' ? 'sj-done' : j.status === 'processing' ? 'sj-processing' : 'sj-pending';
+      var row = document.createElement('div');
+      row.className = 'scan-job';
+      row.innerHTML = '<div><span class="sj-id">' + j.id + '</span></div>'
+        + '<span class="sj-status ' + statusCls + '">' + j.status.toUpperCase() + '</span>'
+        + (j.status === 'done' ? '<span class="sj-view" onclick="viewScanJob(\'' + j.id + '\')">VIEW</span>' : '<span style="font-size:.6rem;color:var(--text3)">--</span>');
+      list.appendChild(row);
+    }
+    goScr('s0');
+  })
+  .catch(function() { goScr('s0'); });
+}
+
+function viewScanJob(jobId) {
+  var token = localStorage.getItem('dwolf_token');
+  if (!token) return;
+  var pp=window.location.pathname.split('/').filter(Boolean);var apiBase=(pp.length>0&&pp[0]!=='api')?'/'+pp[0]:'';
+  goScr('s2');
+  animateSteps();
+  fetch(apiBase+'/api/scan?job_id=' + jobId, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) throw new Error(data.error);
+    if (data.status === 'pending' || data.status === 'processing') {
+      goScr('s0');
+      alert('This scan is still being processed. Check back shortly.');
+      return;
+    }
+    var result = data.result;
+    if (typeof result === 'string') result = JSON.parse(result);
+    analysisResult = result;
+    setTimeout(function() { renderResults(result); }, 500);
+  })
+  .catch(function(err) {
+    goScr('s0');
+    alert('Could not load scan: ' + err.message);
   });
 }
 
@@ -907,6 +1092,11 @@ function scanAnother() {
   var eb = document.getElementById('err-banner');
   if (eb) eb.classList.remove('on');
   goScr('s1');
+}
+
+// Load background scans on page load
+if (localStorage.getItem('dwolf_token')) {
+  setTimeout(checkMyScans, 500);
 }
 </script>
 </body>

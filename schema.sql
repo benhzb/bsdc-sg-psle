@@ -56,6 +56,18 @@ CREATE TABLE IF NOT EXISTS scan_results (
   created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS scan_jobs (
+  id            TEXT PRIMARY KEY,
+  student_id    INTEGER REFERENCES students(id),
+  status        TEXT DEFAULT 'pending',
+  mode          TEXT DEFAULT 'background',
+  messages      TEXT,
+  result        TEXT,
+  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+  completed_at  DATETIME
+);
+
 CREATE INDEX IF NOT EXISTS idx_missions_student ON mission_results(student_id);
+CREATE INDEX IF NOT EXISTS idx_scan_jobs_student ON scan_jobs(student_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_student ON quiz_results(student_id);
 CREATE INDEX IF NOT EXISTS idx_scan_student ON scan_results(student_id);
