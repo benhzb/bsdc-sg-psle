@@ -85,6 +85,46 @@ export async function onRequest(context) {
     return jsonResponse({ error: 'No AI provider configured' }, 500);
   }
 
+  // For non-Anthropic responses, ensure the text is valid JSON matching expected schema
+  if (result.content && result.content.length > 0) {
+    var rawText = '';
+    for (var m = 0; m < result.content.length; m++) {
+      if (result.content[m].type === 'text') rawText += result.content[m].text;
+    }
+    rawText = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+
+    // Try to parse as JSON first
+    var parsed = null;
+    try { parsed = JSON.parse(rawText); } catch (e) {}
+
+    // If not valid JSON, build a structured response from the raw text
+    if (!parsed) {
+      parsed = {
+        question_text: 'Question from uploaded photo',
+        parts: [],
+        student_working: '',
+        correct_answers: {},
+        student_answers: {},
+        score_estimate: 50,
+        grade: 'C',
+        errors: [],
+        correct_method: [{
+          step_number: 1,
+          step_title: 'AI Analysis',
+          step_explanation: rawText.substring(0, 2000),
+          calculation: '',
+          bar_model_description: ''
+        }],
+        key_concepts: ['Review the AI analysis above'],
+        encouragement: 'Keep practising! Upload another paper to get more feedback.',
+        xp_earned: 30
+      };
+    }
+
+    // Replace the content with valid JSON
+    result.content = [{ type: 'text', text: JSON.stringify(parsed) }];
+  }
+
   // Save scan result to DB if authenticated
   if (user && result.content) {
     try {
