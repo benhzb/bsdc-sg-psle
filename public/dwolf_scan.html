@@ -192,6 +192,19 @@ html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:va
 .bm-label{font-size:.58rem;font-weight:800;letter-spacing:1.5px;color:var(--blue);font-family:var(--ffm);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px}
 .bm-label::before{content:"";width:3px;height:10px;background:var(--blue);display:inline-block}
 
+/* ── ANNOTATED IMAGE ── */
+.anno-wrap{display:flex;flex-direction:column;gap:12px}
+.anno-img-wrap{border:1px solid var(--bdr2);border-radius:3px;overflow:hidden;position:relative;background:#000}
+.anno-img{width:100%;display:block;opacity:.85}
+.anno-list{display:flex;flex-direction:column;gap:6px}
+.anno-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:2px;border-left:3px solid}
+.anno-ok{background:rgba(20,160,70,.08);border-left-color:#22c55e}
+.anno-err{background:rgba(231,76,60,.08);border-left-color:var(--red)}
+.anno-warn{background:rgba(245,158,11,.08);border-left-color:var(--amber)}
+.anno-icon{font-size:.9rem;flex-shrink:0;margin-top:1px}
+.anno-label{font-size:.78rem;font-weight:800;color:#fff;margin-bottom:2px}
+.anno-detail{font-size:.72rem;color:var(--text2);line-height:1.5}
+
 /* ENCOURAGEMENT PANEL */
 .enc-box{background:linear-gradient(135deg,rgba(124,181,24,.08),rgba(45,212,191,.05));border:1px solid var(--bdr2);border-radius:2px;padding:16px;text-align:center}
 .enc-wolf{font-size:2.5rem;display:block;margin-bottom:8px;animation:bob 3s ease-in-out infinite}
@@ -541,7 +554,7 @@ function callClaudeAPI() {
   }
   content.push({
     type: 'text',
-    text: 'You are an expert Singapore primary school mathematics tutor specialising in PSLE preparation using BAR MODEL and UNIT METHOD only.\n\nA student has submitted photo(s) of their exam question with their handwritten working.\n\nAnalyse everything and respond with ONLY valid JSON (no markdown, no backticks, no preamble) in this exact structure:\n\n{\n  "question_text": "The full exam question text as written on the paper",\n  "parts": ["(a) question part a text", "(b) question part b text"],\n  "student_working": "Verbatim transcription of ALL the student handwritten working, step by step, line by line",\n  "correct_answers": {"a": "answer", "b": "answer"},\n  "student_answers": {"a": "what student wrote", "b": "what student wrote"},\n  "score_estimate": 75,\n  "grade": "B",\n  "errors": [\n    {\n      "part": "(a)",\n      "error_title": "Short title of the mistake",\n      "error_description": "Clear explanation of what went wrong and WHY it matters. Explain the conceptual misunderstanding, not just the wrong number.",\n      "student_wrote": "Exact notation/calculation student used",\n      "should_be": "What the correct step should be, with reasoning"\n    }\n  ],\n  "correct_method": [\n    {\n      "step_number": 1,\n      "step_title": "Draw the fraction model for Part (a)",\n      "step_explanation": "Detailed explanation (3-5 sentences) of what to do and WHY. Use bar model language: units, parts, shading, brackets, labels. Explain the reasoning behind each step, not just the calculation. Connect fractions to the bar model visually.",\n      "calculation": "1/7 + 2/5 = 5/35 + 14/35 = 19/35 given away. Kept = 1 - 19/35 = 16/35",\n      "bar_model_description": "Draw a long bar representing ALL of Abel tarts. Divide it into 35 equal parts (common denominator of 7 and 5). Shade 5 parts in BLUE and label: given to Ben (1/7 = 5/35). Shade 14 parts in RED and label: given to Chris (2/5 = 14/35). The remaining 16 parts are UNSHADED - label: Abel kept (16/35). Write below the bar: Abel kept 16/35 of his tarts."\n    },\n    {\n      "step_number": 2,\n      "step_title": "Use the after ratio to find 1 unit value for Part (b)",\n      "step_explanation": "After giving away tarts, the ratio Abel:Ben:Chris = 4:3:9. This means total units = 4+3+9 = 16 units. Since total tarts = 448, each unit = 448 / 16 = 28 tarts. Now we need to link Abel after (4 units) to Abel original to find everyone original amount.",\n      "calculation": "Total ratio units = 4 + 3 + 9 = 16 units. 16 units = 448 tarts. 1 unit = 448 / 16 = 28 tarts.",\n      "bar_model_description": "Draw 3 bars stacked vertically, all same scale. Top bar: Abel = 4 equal boxes. Middle bar: Ben = 3 equal boxes. Bottom bar: Chris = 9 equal boxes. Draw a bracket on the right spanning all 3 bars, label it: 448 tarts (16 units total). Below write: 1 unit = 28 tarts. Label each person: Abel after = 4u = 112, Ben after = 3u = 84, Chris after = 9u = 252."\n    }\n  ],\n  "key_concepts": [\n    "Concept 1: detailed explanation of the key technique used (2-3 sentences)",\n    "Concept 2: detailed explanation of another technique (2-3 sentences)",\n    "Concept 3: common mistake to avoid and why (2-3 sentences)"\n  ],\n  "encouragement": "A warm, specific, encouraging message for the student (3-4 sentences). Mention what they did well FIRST. Then explain the key thing to focus on next time. Be specific about their working.",\n  "xp_earned": 45\n}\n\nCRITICAL RULES:\n- Use ONLY Singapore primary school methods (bar model, unit method, unitary method)\n- NO algebra, NO cross-multiplication, NO variables like x, y, or n\n- Provide 4-8 detailed steps in correct_method, covering EVERY part of the question\n- Each step MUST have a detailed bar_model_description (3-5 sentences describing exactly what to draw: how many parts, what colours, what labels, what brackets, what annotations)\n- Each step_explanation must be 3-5 sentences explaining the REASONING, not just stating the calculation\n- For fraction questions: always show the fraction model with common denominators\n- For ratio questions: always show the unit method with labelled bars\n- For multi-part questions: show the KEY LINK between parts (e.g., how Abel after connects to Abel original)\n- Link related values: show how to work backwards from after to before using fractions and ratios\n- Show verification step at the end (check: does everything add up?)\n- Be specific about mistakes - quote exactly what the student wrote\n- score_estimate is 0-100 based on marks likely awarded\n- grade: A (85+), B (70-84), C (55-69), D (below 55)\n- xp_earned: 30-100 based on attempt quality (give credit for trying)\n- key_concepts: exactly 3 items, each 2-3 sentences with detailed explanation'
+    text: 'You are an expert Singapore primary school mathematics tutor specialising in PSLE preparation using BAR MODEL and UNIT METHOD only.\n\nA student has submitted photo(s) of their exam question with their handwritten working.\n\nAnalyse everything and respond with ONLY valid JSON (no markdown, no backticks, no preamble) in this exact structure:\n\n{\n  "question_text": "The full exam question text as written on the paper",\n  "parts": ["(a) question part a text", "(b) question part b text"],\n  "student_working": "Verbatim transcription of ALL the student handwritten working, step by step, line by line",\n  "correct_answers": {"a": "answer", "b": "answer"},\n  "student_answers": {"a": "what student wrote", "b": "what student wrote"},\n  "score_estimate": 75,\n  "grade": "B",\n  "image_annotations": [\n    {"label": "Correct!", "detail": "Bar model drawn correctly", "type": "correct"},\n    {"label": "Error here", "detail": "1/7 should be 5/35 not 4/35", "type": "error"},\n    {"label": "Missing step", "detail": "Need to show common denominator working", "type": "warning"}\n  ],\n  "errors": [\n    {\n      "part": "(a)",\n      "error_title": "Short title of the mistake",\n      "error_description": "Clear explanation of what went wrong and WHY it matters.",\n      "student_wrote": "Exact notation/calculation student used",\n      "should_be": "What the correct step should be"\n    }\n  ],\n  "correct_method": [\n    {\n      "step_number": 1,\n      "step_title": "Step title",\n      "step_explanation": "Detailed 3-5 sentence explanation of reasoning.",\n      "calculation": "The calculation string",\n      "bar_model": {\n        "type": "single",\n        "title": "Abel original tarts - fraction model",\n        "bars": [\n          {\n            "label": "Abel",\n            "segments": [\n              {"units": 5, "color": "blue", "text": "To Ben (1/7)"},\n              {"units": 14, "color": "purple", "text": "To Chris (2/5)"},\n              {"units": 16, "color": "green", "text": "Abel keeps (16/35)"}\n            ]\n          }\n        ],\n        "total_label": "35 parts total",\n        "annotation": "Abel kept 16/35 of his tarts"\n      }\n    },\n    {\n      "step_number": 2,\n      "step_title": "Step title",\n      "step_explanation": "Detailed explanation.",\n      "calculation": "4 + 3 + 9 = 16 units = 448, 1u = 28",\n      "bar_model": {\n        "type": "comparison",\n        "title": "After giving - ratio 4:3:9",\n        "bars": [\n          {"label": "Abel", "segments": [{"units": 4, "color": "amber", "text": "4u = 112"}]},\n          {"label": "Ben", "segments": [{"units": 3, "color": "blue", "text": "3u = 84"}]},\n          {"label": "Chris", "segments": [{"units": 9, "color": "purple", "text": "9u = 252"}]}\n        ],\n        "total_label": "16 units = 448 tarts",\n        "annotation": "1 unit = 28 tarts"\n      }\n    }\n  ],\n  "key_concepts": [\n    "Concept 1: detailed explanation (2-3 sentences)",\n    "Concept 2: detailed explanation (2-3 sentences)",\n    "Concept 3: common mistake to avoid (2-3 sentences)"\n  ],\n  "encouragement": "Warm encouraging message (3-4 sentences). Mention what they did well FIRST.",\n  "xp_earned": 45\n}\n\nBAR MODEL DATA RULES:\n- bar_model.type: \"single\" (one bar divided into parts), \"comparison\" (multiple bars stacked for comparison), or \"transfer\" (showing before/after with arrows)\n- Each bar has segments with: units (integer), color (one of: green, blue, purple, amber, red, teal), text (label shown on/below the segment)\n- total_label: text shown on the right bracket\n- annotation: text shown below the bar model\n- For fraction models: divide into common denominator parts, shade given-away portions\n- For ratio models: show each person as a separate bar with proportional units\n- For transfer models: show two rows (before/after) with arrows indicating transfer\n- EVERY step in correct_method MUST have a bar_model object (not just text description)\n\nIMAGE ANNOTATION RULES:\n- image_annotations: list of observations about the student photo\n- type: \"correct\" (green, something done right), \"error\" (red, mistake), \"warning\" (amber, missing/incomplete)\n- Keep label short (2-4 words), detail explains what happened\n- Include 2-5 annotations covering key observations\n\nCRITICAL RULES:\n- Use ONLY Singapore primary school methods (bar model, unit method)\n- NO algebra, NO cross-multiplication, NO variables\n- Provide 4-8 steps covering EVERY part of the question\n- Each step_explanation: 3-5 sentences explaining REASONING\n- Show verification step at the end\n- score_estimate 0-100, grade A/B/C/D, xp_earned 30-100\n- key_concepts: exactly 3 items, each 2-3 sentences'
   });
 
   var token = localStorage.getItem('dwolf_token') || '';
@@ -626,11 +639,17 @@ function renderResults(r) {
   if (r.correct_method && r.correct_method.length > 0) {
     for (var i = 0; i < r.correct_method.length; i++) {
       var s = r.correct_method[i];
+      var bmHtml = '';
+      if (s.bar_model && s.bar_model.bars && s.bar_model.bars.length > 0) {
+        bmHtml = renderBarModelSVG(s.bar_model);
+      } else if (s.bar_model_description) {
+        bmHtml = '<div class="bm-container"><div class="bm-label">BAR MODEL</div><div style="font-size:.76rem;color:var(--text2);line-height:1.6">' + s.bar_model_description + '</div></div>';
+      }
       methodHtml += '<div class="mstep">'
-        + '<div class="ms-num">STEP ' + s.step_number + ' &mdash; ' + (s.step_title || '') + '</div>'
+        + '<div class="ms-num">STEP ' + s.step_number + ' &mdash; ' + (s.step_title || '').toUpperCase() + '</div>'
         + '<div class="ms-txt">' + (s.step_explanation || '') + '</div>'
         + (s.calculation ? '<div class="ms-formula">' + s.calculation + '</div>' : '')
-        + (s.bar_model_description ? '<div class="bm-container"><div class="bm-label">BAR MODEL</div><div style="font-size:.76rem;color:var(--text2);line-height:1.6">' + s.bar_model_description + '</div></div>' : '')
+        + bmHtml
         + '</div>';
     }
   }
@@ -681,6 +700,9 @@ function renderResults(r) {
     + '<div class="sc-stat"><span class="ss-v" style="color:var(--purple)">+' + (r.xp_earned || 30) + '</span><span class="ss-l">XP</span></div>'
     + '</div></div>'
 
+    // ANNOTATED IMAGE
+    + renderAnnotatedImage(r)
+
     // ANSWERS SUMMARY
     + buildSection('&#x2714;&#xFE0F;', 'Answers', answersHtml, true, 'tag-ok', 'SUMMARY')
 
@@ -717,6 +739,138 @@ function renderResults(r) {
     st.xp = (st.xp || 0) + (r.xp_earned || 30);
     localStorage.setItem('dw_state', JSON.stringify(st));
   } catch(err) {}
+}
+
+/* ── SVG BAR MODEL RENDERER ── */
+function renderBarModelSVG(bm) {
+  if (!bm || !bm.bars || bm.bars.length === 0) return '';
+  var COLORS = {
+    green:'rgba(20,160,70,.28)', blue:'rgba(56,189,248,.25)', purple:'rgba(167,139,250,.25)',
+    amber:'rgba(245,158,11,.25)', red:'rgba(231,76,60,.25)', teal:'rgba(45,212,191,.25)'
+  };
+  var STROKES = {
+    green:'#22c55e', blue:'#38bdf8', purple:'#a78bfa',
+    amber:'#f59e0b', red:'#e74c3c', teal:'#2dd4bf'
+  };
+
+  var labelW = 60, pad = 10, barH = 32, gap = 8, maxBarW = 380;
+  var numBars = bm.bars.length;
+  var titleH = bm.title ? 22 : 0;
+  var annotH = bm.annotation ? 20 : 0;
+  var totalLabelW = bm.total_label ? 28 : 0;
+  var svgH = titleH + (numBars * (barH + gap)) + annotH + pad;
+  var svgW = labelW + maxBarW + totalLabelW + pad * 2;
+
+  // Find max total units for scaling
+  var maxUnits = 0;
+  for (var b = 0; b < numBars; b++) {
+    var barTotal = 0;
+    for (var s = 0; s < bm.bars[b].segments.length; s++) barTotal += (bm.bars[b].segments[s].units || 1);
+    if (barTotal > maxUnits) maxUnits = barTotal;
+  }
+  if (maxUnits === 0) maxUnits = 1;
+
+  var svg = '<svg width="100%" viewBox="0 0 ' + svgW + ' ' + svgH + '" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,Arial,sans-serif">';
+
+  // Title
+  if (bm.title) {
+    svg += '<text x="' + (svgW / 2) + '" y="14" text-anchor="middle" fill="#8a9a6a" font-size="9" font-weight="700" letter-spacing="0.5">' + escSvg(bm.title) + '</text>';
+  }
+
+  var yStart = titleH + 4;
+  for (var b = 0; b < numBars; b++) {
+    var bar = bm.bars[b];
+    var y = yStart + b * (barH + gap);
+    var barTotal = 0;
+    for (var s = 0; s < bar.segments.length; s++) barTotal += (bar.segments[s].units || 1);
+
+    // Label
+    svg += '<text x="' + (labelW - 4) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="end" fill="#d4e4a0" font-size="10" font-weight="700">' + escSvg(bar.label || '') + '</text>';
+
+    // Segments
+    var x = labelW;
+    var scale = maxBarW / maxUnits;
+    for (var s = 0; s < bar.segments.length; s++) {
+      var seg = bar.segments[s];
+      var units = seg.units || 1;
+      var w = units * scale;
+      var col = seg.color || 'green';
+      var fill = COLORS[col] || COLORS.green;
+      var stroke = STROKES[col] || STROKES.green;
+
+      svg += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + barH + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5" rx="2"/>';
+
+      // Segment text
+      var txt = seg.text || (units + 'u');
+      var fontSize = w > 60 ? 8 : 7;
+      if (w > 30) {
+        svg += '<text x="' + (x + w / 2) + '" y="' + (y + barH / 2 + 3) + '" text-anchor="middle" fill="' + stroke + '" font-size="' + fontSize + '" font-weight="700">' + escSvg(txt) + '</text>';
+      }
+      x += w;
+    }
+
+    // Unit dividers
+    x = labelW;
+    for (var s = 0; s < bar.segments.length; s++) {
+      var units = bar.segments[s].units || 1;
+      for (var u = 0; u < units; u++) {
+        svg += '<line x1="' + x + '" y1="' + y + '" x2="' + x + '" y2="' + (y + barH) + '" stroke="rgba(255,255,255,.08)" stroke-width="0.5"/>';
+        x += scale;
+      }
+    }
+  }
+
+  // Total label bracket
+  if (bm.total_label) {
+    var bracketX = labelW + maxBarW + 6;
+    var topY = yStart;
+    var botY = yStart + numBars * (barH + gap) - gap;
+    svg += '<line x1="' + bracketX + '" y1="' + topY + '" x2="' + bracketX + '" y2="' + botY + '" stroke="#8a9a6a" stroke-width="1"/>';
+    svg += '<line x1="' + (bracketX - 4) + '" y1="' + topY + '" x2="' + bracketX + '" y2="' + topY + '" stroke="#8a9a6a" stroke-width="1"/>';
+    svg += '<line x1="' + (bracketX - 4) + '" y1="' + botY + '" x2="' + bracketX + '" y2="' + botY + '" stroke="#8a9a6a" stroke-width="1"/>';
+    svg += '<text x="' + (bracketX + 4) + '" y="' + ((topY + botY) / 2 + 3) + '" fill="#8a9a6a" font-size="8" font-weight="600">' + escSvg(bm.total_label) + '</text>';
+  }
+
+  // Annotation
+  if (bm.annotation) {
+    svg += '<text x="' + (svgW / 2) + '" y="' + (svgH - 4) + '" text-anchor="middle" fill="#7cb518" font-size="9" font-weight="700">' + escSvg(bm.annotation) + '</text>';
+  }
+
+  svg += '</svg>';
+
+  return '<div class="bm-container"><div class="bm-label">BAR MODEL</div>' + svg + '</div>';
+}
+
+function escSvg(t) {
+  if (!t) return '';
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── ANNOTATED IMAGE ── */
+function renderAnnotatedImage(r) {
+  if (!images || images.length === 0) return '';
+  var annotations = r.image_annotations || [];
+  if (annotations.length === 0 && r.errors && r.errors.length === 0) return '';
+
+  var annoHtml = '';
+  for (var i = 0; i < annotations.length; i++) {
+    var a = annotations[i];
+    var typeClass = a.type === 'correct' ? 'anno-ok' : a.type === 'error' ? 'anno-err' : 'anno-warn';
+    var icon = a.type === 'correct' ? '&#x2705;' : a.type === 'error' ? '&#x274C;' : '&#x26A0;&#xFE0F;';
+    annoHtml += '<div class="anno-item ' + typeClass + '">'
+      + '<span class="anno-icon">' + icon + '</span>'
+      + '<div><div class="anno-label">' + (a.label || '') + '</div>'
+      + '<div class="anno-detail">' + (a.detail || '') + '</div></div>'
+      + '</div>';
+  }
+
+  var imgSrc = 'data:' + imageTypes[0] + ';base64,' + images[0];
+  var bodyHtml = '<div class="anno-wrap">'
+    + '<div class="anno-img-wrap"><img src="' + imgSrc + '" class="anno-img" alt="Student working"></div>'
+    + (annoHtml ? '<div class="anno-list">' + annoHtml + '</div>' : '')
+    + '</div>';
+
+  return buildSection('&#x1F4F8;', 'Your Paper (annotated)', bodyHtml, true, annotations.length > 0 ? 'tag-warn' : '', annotations.length + ' NOTES');
 }
 
 function buildSection(icon, title, bodyHtml, startOpen, badgeCls, badgeTxt) {
