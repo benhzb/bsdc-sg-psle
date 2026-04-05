@@ -123,7 +123,12 @@ function buildAIMessages(messages) {
   if (imageData.length > 0) {
     var parts = [];
     for (var j = 0; j < imageData.length; j++) {
-      parts.push({ type: 'image', image: 'data:' + imageData[j].media_type + ';base64,' + imageData[j].data });
+      parts.push({
+        type: 'image_url',
+        image_url: {
+          url: 'data:' + imageData[j].media_type + ';base64,' + imageData[j].data
+        }
+      });
     }
     parts.push({ type: 'text', text: promptText });
     return [{ role: 'user', content: parts }];
