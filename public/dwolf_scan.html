@@ -741,11 +741,24 @@ function checkMyScans() {
     for (var i = 0; i < jobs.length; i++) {
       var j = jobs[i];
       var statusCls = j.status === 'done' ? 'sj-done' : j.status === 'processing' ? 'sj-processing' : 'sj-pending';
+      var gradeHtml = '';
+      if (j.preview && j.preview.grade) {
+        var gc = j.preview.grade === 'A' ? 'color:#22c55e' : j.preview.grade === 'B' ? 'color:var(--accent)' : j.preview.grade === 'C' ? 'color:var(--amber)' : 'color:var(--red)';
+        gradeHtml = '<span style="font-weight:900;font-size:.85rem;' + gc + '">' + j.preview.grade + '</span>';
+      }
+      var questionHtml = j.preview && j.preview.question ? '<div style="font-size:.62rem;color:var(--text3);margin-top:2px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + j.preview.question + '</div>' : '';
+      var modeTag = j.mode === 'express' ? '<span style="font-size:.5rem;color:var(--purple);font-weight:800">EXPRESS</span>' : j.mode === 'background' ? '<span style="font-size:.5rem;color:var(--amber);font-weight:800">BG</span>' : '';
+      var timeAgo = j.created_at ? formatTimeAgo(j.created_at) : '';
       var row = document.createElement('div');
       row.className = 'scan-job';
-      row.innerHTML = '<div><span class="sj-id">' + j.id + '</span></div>'
+      row.innerHTML = '<div style="display:flex;align-items:center;gap:8px">'
+        + gradeHtml
+        + '<div><span class="sj-id">' + j.id + '</span> ' + modeTag + questionHtml + '</div></div>'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<span style="font-size:.55rem;color:var(--text3);font-family:var(--ffm)">' + timeAgo + '</span>'
         + '<span class="sj-status ' + statusCls + '">' + j.status.toUpperCase() + '</span>'
-        + (j.status === 'done' ? '<span class="sj-view" onclick="viewScanJob(\'' + j.id + '\')">VIEW</span>' : '<span style="font-size:.6rem;color:var(--text3)">--</span>');
+        + (j.status === 'done' ? '<span class="sj-view" onclick="viewScanJob(\'' + j.id + '\')">VIEW</span>' : '')
+        + '</div>';
       list.appendChild(row);
     }
     goScr('s0');
@@ -1094,7 +1107,17 @@ function scanAnother() {
   goScr('s1');
 }
 
-// Load background scans on page load
+function formatTimeAgo(dateStr) {
+  var d = new Date(dateStr);
+  var now = new Date();
+  var diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return Math.floor(diff / 86400) + 'd ago';
+}
+
+// Load scans on page load
 if (localStorage.getItem('dwolf_token')) {
   setTimeout(checkMyScans, 500);
 }

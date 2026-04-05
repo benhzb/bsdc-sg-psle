@@ -28,9 +28,22 @@ export async function onRequest(context) {
 
     if (listMode) {
       var jobs = await env.DB.prepare(
-        'SELECT id, status, created_at, completed_at FROM scan_jobs WHERE student_id = ? ORDER BY created_at DESC LIMIT 20'
+        'SELECT id, status, mode, result, created_at, completed_at FROM scan_jobs WHERE student_id = ? ORDER BY created_at DESC LIMIT 20'
       ).bind(user.student_id).all();
-      return jsonResponse({ jobs: jobs.results || [] });
+      // Add preview info (grade, question snippet) without sending full result
+      var jobList = (jobs.results || []).map(function(j) {
+        var preview = {};
+        if (j.result) {
+          try {
+            var parsed = JSON.parse(j.result);
+            preview.grade = parsed.grade || '';
+            preview.score = parsed.score_estimate || 0;
+            preview.question = (parsed.question_text || '').substring(0, 60);
+          } catch (e) {}
+        }
+        return { id: j.id, status: j.status, mode: j.mode, created_at: j.created_at, preview: preview };
+      });
+      return jsonResponse({ jobs: jobList });
     }
 
     return jsonResponse({ error: 'Provide job_id or list=1' }, 400);
@@ -76,34 +89,42 @@ export async function onRequest(context) {
   }
 
   // Express / Standard: process immediately
-  var result;
-  var status = 200;
-
-  if (env.ANTHROPIC_API_KEY) {
-    var anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: model,
-        max_tokens: body.max_tokens || 4000,
-        messages: body.messages
-      })
-    });
-    result = await anthropicResponse.json();
-    status = anthropicResponse.status;
-  } else {
+  if (!env.ANTHROPIC_API_KEY) {
     return jsonResponse({ error: 'ANTHROPIC_API_KEY not configured' }, 500);
   }
+
+  var jobId = 'SCAN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+  var anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: model,
+      max_tokens: body.max_tokens || 4000,
+      messages: body.messages
+    })
+  });
+  var result = await anthropicResponse.json();
+  var status = anthropicResponse.status;
 
   // Ensure valid JSON in response
   result = normalizeResult(result);
 
-  // Save to scan_results if authenticated
+  // Save full result to scan_jobs for all modes (so user can review later)
   if (user && result.content) {
+    var resultText = '';
+    for (var i = 0; i < result.content.length; i++) {
+      if (result.content[i].type === 'text') resultText += result.content[i].text;
+    }
+    try {
+      await env.DB.prepare(
+        'INSERT INTO scan_jobs (id, student_id, status, mode, result, created_at, completed_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
+      ).bind(jobId, user.student_id, 'done', mode, resultText).run();
+    } catch (e) {}
     saveScanResult(env, user.student_id, result);
   }
 
